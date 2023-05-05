@@ -64,6 +64,7 @@ private:
   HistoManager* histoManager;
   G4int  glEventID, glPrintModulo;
   G4int  fHPGe_HCID;
+  G4int  fSDD_HCID;
 
 };
 

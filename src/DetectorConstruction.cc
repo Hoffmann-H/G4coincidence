@@ -142,11 +142,13 @@ void DetectorConstruction::ConstructSDandField()
 {
   // Sensitive detectors
 
-  G4String HPGeSDname = "HPGeSD";
-  HPGeSD* aHPGeSD = new HPGeSD(HPGeSDname, "HPGeHitsCollection");
+  HPGeSD* aHPGeSD = new HPGeSD("HPGeSD", "HPGeHitsCollection");
   G4SDManager::GetSDMpointer()->AddNewDetector(aHPGeSD);
-  // Setting SD to a logical volume by
   SetSensitiveDetector("logicHPGe", aHPGeSD, true);
+
+  HPGeSD* aSDDSD = new HPGeSD("SDDSD", "SDDHitsCollection");
+  G4SDManager::GetSDMpointer()->AddNewDetector(aSDDSD);
+  SetSensitiveDetector("logicSDD", aSDDSD, true);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
