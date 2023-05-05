@@ -1,0 +1,14 @@
+/control/verbose 2
+/run/verbose 0
+#
+/gun/particle ion
+/gun/ion 10 24
+#
+#/rdecay01/fullChain false
+#
+#/analysis/setFileName run1
+#/analysis/h1/set 1  5000  0. 5 MeV
+#
+/run/printProgress 10000
+#  
+/run/beamOn 100000
