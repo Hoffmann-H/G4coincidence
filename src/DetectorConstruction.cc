@@ -67,6 +67,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Material* mat_Ge = 
   G4NistManager::Instance()->FindOrBuildMaterial("G4_Ge");
   
+  G4Material* mat_Si = 
+  G4NistManager::Instance()->FindOrBuildMaterial("G4_Si");
+  
   //     
   // World
   //
@@ -101,23 +104,31 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4double HPGe_dz = 160.0 * mm;
   G4double HPGe_sphi = 0.0;
   G4double HPGe_dphi = 2*M_PI;
-  G4Tubs* 
-  solidGe = new G4Tubs("solidHPGe",
-                    HPGe_rmin, HPGe_rmax, HPGe_dz/2, HPGe_sphi, HPGe_dphi);
+  G4ThreeVector* HPGe_trans = new G4ThreeVector(
+    0, 0, -90.0*mm);
+  G4Tubs* solidGe = new G4Tubs("solidHPGe",
+    HPGe_rmin, HPGe_rmax, HPGe_dz/2, HPGe_sphi, HPGe_dphi);
+  G4LogicalVolume* logicGe = new G4LogicalVolume(
+    solidGe, mat_Ge, "logicHPGe");
+  G4VPhysicalVolume* physiGe = new G4PVPlacement(
+    0, *HPGe_trans, logicGe, "physiGe", logicWorld, false, 0);
 
-  G4LogicalVolume*
-  logicGe = new G4LogicalVolume(solidGe, 
-                                    mat_Ge,
-                                    "logicHPGe");
-
-  G4VPhysicalVolume*
-  physiGe = new G4PVPlacement(0,
-                                  G4ThreeVector(),
-                                  logicGe,
-                                  "physiGe",
-                                  logicWorld,
-                                  false,
-                                  0);
+  //
+  // SDD
+  //
+  G4double SDD_rmin = 0.0;
+  G4double SDD_rmax = 6.9*mm;
+  G4double SDD_dz = 0.45*mm;
+  G4double SDD_sphi = 0.0;
+  G4double SDD_dphi = 2.0*M_PI;
+  G4ThreeVector* SDD_trans = new G4ThreeVector(
+    0, 0, 10.0*mm);
+  G4Tubs* solidSi = new G4Tubs("solidSDD", 
+    SDD_rmin, SDD_rmax, SDD_dz/2, SDD_sphi, SDD_dphi);
+  G4LogicalVolume* logicSi = new G4LogicalVolume(
+    solidSi, mat_Si, "logicSDD");
+  G4VPhysicalVolume* physiSi = new G4PVPlacement(
+    0, *SDD_trans, logicSi, "physiSi", logicWorld, false, 0);
 
   //
   //always return the physical World

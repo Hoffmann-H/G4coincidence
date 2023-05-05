@@ -81,7 +81,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     fParticleGun->SetParticleCharge(ionCharge);
   }
 
-  G4double sample_cz = 10.0*cm; // sample center z
+  G4double sample_cz = 0.0*cm; // sample center z
   G4double sample_r = 0;        // sample radius
   G4double sample_dz = 0;       // sample total z thickness
 
