@@ -38,7 +38,8 @@
 HistoManager::HistoManager()
 {
   fFileName = "results/out.root";
-  Edep = 0;
+  HPGeEdep = 0;
+  SDDEdep = 0;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -84,20 +85,30 @@ void HistoManager::Book()
     G4int ih = analysisManager->CreateH1(id[k], title[k], nbins, vmin, vmax);
     analysisManager->SetH1Activation(ih, false);
   }*/
+
+  pEvtTree = new TTree("tEvt", "event tree");
+  pEvtTree->Branch("ge", &HPGeEdep);
+  pEvtTree->Branch("sdd", &SDDEdep);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void HistoManager::SetEdep(G4double edep)
+void HistoManager::SetEdep(G4int det, G4double edep)
 {
-  Edep = edep;
+  // Edeps to be changed into an array
+  if (det == 0)
+    HPGeEdep = edep;
+  else if (det == 1)
+    SDDEdep = edep;
+  else G4cout << "Unknown detector id: " << det << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void HistoManager::Fill()
 {
-  pH1Edep->Fill(Edep);///CLHEP::keV);
+  pH1Edep->Fill(HPGeEdep);///CLHEP::keV);
+  pEvtTree->Fill();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -106,6 +117,7 @@ void HistoManager::SaveFile()
 {
   TFile* f = TFile::Open(fFileName.c_str(), "UPDATE");
   pH1Edep->Write("", TObject::kOverwrite);
+  pEvtTree->Write("", TObject::kOverwrite);
   f->Save();
   f->Close();
   G4cout << "Save file" << G4endl;

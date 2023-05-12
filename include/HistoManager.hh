@@ -52,15 +52,17 @@ class HistoManager
     HistoManager();
     ~HistoManager();
     void Book();
-    void SetEdep(G4double edep);
+    void SetEdep(G4int det, G4double edep);
     void Fill();
     void SaveFile();
     void CloseFile();
 
   private:
     G4String fFileName;
-    G4double Edep;
+    G4double HPGeEdep;
+    G4double SDDEdep;
     TH1F* pH1Edep;
+    TTree* pEvtTree;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

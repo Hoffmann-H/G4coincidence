@@ -114,9 +114,11 @@ void EventAction::EndOfEventAction(const G4Event* evt)
 
     // Fill Histogram
     //G4cout << "Fill " << G4BestUnit(totEdep, "Energy") << G4endl;
-    histoManager->SetEdep(HPGeEdep/CLHEP::keV);
+    histoManager->SetEdep(0, HPGeEdep/CLHEP::keV);
+    histoManager->SetEdep(1, SDDEdep/CLHEP::keV);
     histoManager->Fill();
 //    G4AnalysisManager::Instance()->FillH1(1, totEdep);
+
 }
 
 
