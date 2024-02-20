@@ -2,7 +2,8 @@
 /run/verbose 0
 #
 /gun/particle ion
-/gun/ion 10 24
+/gun/ion 55 137 # Cs-137
+#/gun/ion 10 24 # Ne-24
 #
 #/rdecay01/fullChain false
 #

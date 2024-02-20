@@ -109,8 +109,8 @@ void EventAction::EndOfEventAction(const G4Event* evt)
         SDDEdep += hit->GetEdep();
         //G4cout << "total Edep: " << totEdep << G4endl;
     }
-    G4cout << "SDD hit " << G4BestUnit(SDDEdep, "Energy") << G4endl;
-    G4cout << "HPGe hit " << G4BestUnit(HPGeEdep, "Energy") << G4endl;
+    //G4cout << "SDD hit " << G4BestUnit(SDDEdep, "Energy") << G4endl;
+    //G4cout << "HPGe hit " << G4BestUnit(HPGeEdep, "Energy") << G4endl;
 
     // Fill Histogram
     //G4cout << "Fill " << G4BestUnit(totEdep, "Energy") << G4endl;
