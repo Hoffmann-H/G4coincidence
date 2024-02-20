@@ -33,16 +33,17 @@
 #ifndef HistoManager_h
 #define HistoManager_h 1
 
-#include "globals.hh"
-
-//#include "g4root.hh" // include g4root.hh for G4AnalysisManager
-
 //root includes
 #include "TFile.h"
 #include "TDirectory.h"
 #include "TTree.h"
 #include "TH1F.h"
 #include "TH2F.h"
+
+#include "globals.hh"
+//#include "g4root.hh" // include g4root.hh for G4AnalysisManager
+
+class HistoMessenger;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -56,9 +57,11 @@ class HistoManager
     void Fill();
     void SaveFile();
     void CloseFile();
+    void SetResultsFile(G4String filename);
 
   private:
-    G4String fFileName;
+    HistoMessenger *histoMessenger;
+    G4String fResFilename;
     G4double HPGeEdep;
     G4double SDDEdep;
     TH1F* pH1Edep;

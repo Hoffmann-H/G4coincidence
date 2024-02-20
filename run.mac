@@ -4,11 +4,11 @@
 /gun/particle ion
 /gun/ion 55 137 # Cs-137
 #/gun/ion 10 24 # Ne-24
+#/gun/particle e-
+#/gun/energy 1000 keV
+#/gun/direction 0 0 1
 #
-#/rdecay01/fullChain false
-#
-#/analysis/setFileName run1
-#/analysis/h1/set 1  5000  0. 5 MeV
+/histo/file results/out.root
 #
 /run/printProgress 10000
 #  

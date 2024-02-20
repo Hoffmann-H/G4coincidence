@@ -31,15 +31,17 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "HistoManager.hh"
+#include "HistoMessenger.hh"
 #include "G4UnitsTable.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 HistoManager::HistoManager()
 {
-  fFileName = "results/out.root";
+  fResFilename = "results/out.root";
   HPGeEdep = 0;
   SDDEdep = 0;
+  histoMessenger = new HistoMessenger(this);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -115,7 +117,7 @@ void HistoManager::Fill()
 
 void HistoManager::SaveFile()
 {
-  TFile* f = TFile::Open(fFileName.c_str(), "UPDATE");
+  TFile* f = TFile::Open(fResFilename.c_str(), "UPDATE");
   pH1Edep->Write("", TObject::kOverwrite);
   pEvtTree->Write("", TObject::kOverwrite);
   f->Save();
@@ -130,6 +132,13 @@ void HistoManager::CloseFile()
   SaveFile();
   //delete pH1Edep;
   G4cout << "Close file" << G4endl;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void HistoManager::SetResultsFile(G4String filename)
+{
+    fResFilename = filename;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
