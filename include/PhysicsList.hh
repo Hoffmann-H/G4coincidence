@@ -39,13 +39,16 @@
 /// - G4RadioactiveDecayPhysics
 /// - G4EmStandardPhysics
 
-class B3PhysicsList: public G4VModularPhysicsList
+class PhysicsList: public G4VModularPhysicsList
 {
 public:
-  B3PhysicsList();
-  virtual ~B3PhysicsList();
+  PhysicsList();
+  virtual ~PhysicsList();
 
   virtual void SetCuts();
+
+  virtual void ConstructParticle();
+  virtual void ConstructProcess();
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

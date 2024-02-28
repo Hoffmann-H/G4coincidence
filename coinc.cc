@@ -74,7 +74,7 @@ int main(int argc,char** argv) {
   //set mandatory initialization classes
   //
   runManager->SetUserInitialization(new DetectorConstruction);
-  runManager->SetUserInitialization(new B3PhysicsList);
+  runManager->SetUserInitialization(new PhysicsList);
   //runManager->SetUserInitialization(new QGSP_BIC);
   //runManager->SetUserInitialization(new FTFP_BERT);
 
