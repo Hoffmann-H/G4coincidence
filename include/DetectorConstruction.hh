@@ -35,9 +35,12 @@
 
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
+#include "G4Transform3D.hh"
+#include <map>
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;
+class G4Material;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -53,8 +56,12 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     virtual void ConstructSDandField();
 
   private:
+    void BuildMaterials();
+    void ConstructXrayDetector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
   
+    G4bool checkOverlaps;
     G4double fWorldSize;
+    std::map<G4String,G4Material*> mat;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -89,7 +89,7 @@ void PrimaryGenerator::GeneratePrimaryVertex(G4Event* event)
   {
     // Vertex at position and time
     G4double timeA = 0.0*s;
-    G4PrimaryVertex* vertexA = new G4PrimaryVertex(1.0*cm,0,0, timeA);
+    G4PrimaryVertex* vertexA = new G4PrimaryVertex(position, timeA);
     // Getting ion from ion table
     G4double ionCharge   = 0.*eplus;
     G4double excitEnergy = 0.*keV;

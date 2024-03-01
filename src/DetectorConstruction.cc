@@ -33,6 +33,7 @@
 #include "DetectorConstruction.hh"
 
 #include "G4NistManager.hh"
+#include "G4Material.hh"
 #include "G4Box.hh"
 #include "G4Tubs.hh"
 #include "G4LogicalVolume.hh"
@@ -40,6 +41,10 @@
 #include "G4SystemOfUnits.hh"
 #include "G4SDManager.hh"
 #include "HPGeSD.hh"
+#include "G4VisAttributes.hh"
+#include "G4Colour.hh"
+#include "G4Vector3D.hh"
+#include "G4Point3D.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -56,19 +61,69 @@ DetectorConstruction::~DetectorConstruction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+void DetectorConstruction::BuildMaterials()
+{ // Define materials via NIST manager
+  auto nist = G4NistManager::Instance();
+  mat["Ge"] = nist->FindOrBuildMaterial("G4_Ge");
+  mat["alu"] = nist->FindOrBuildMaterial("G4_Al");
+  mat["Si"] = nist->FindOrBuildMaterial("G4_Si");
+  mat["Be"] = nist->FindOrBuildMaterial("G4_Be");
+  mat["air"] = nist->FindOrBuildMaterial("G4_AIR");
+  mat["Pb"] = nist->FindOrBuildMaterial("G4_Pb");
+  mat["concrete"] = nist->FindOrBuildMaterial("G4_CONCRETE");
+  mat["PMMA"] = nist->FindOrBuildMaterial("G4_PLEXIGLASS");
+  mat["Cu"] = nist->FindOrBuildMaterial("G4_Cu");
+  //G4Ele
+  //TODO: peltier, tantalum collimator
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::ConstructXrayDetector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+// Construct the SDD X-ray detector, 
+// with frontent point at given frontend_position and given rotation. 
+// frontend point := intersection of sensor rotation axis with front layer of housing
+{
+  // Si sensitive part
+  G4double sens_depth = 3.94*mm; // distance between front layer of housing and front layer of Si sensor
+  G4double sens_dz = 0.45*mm;
+  G4double sens_rmin = 0.0*mm;
+  G4double sens_rmax = sqrt(150.0/M_PI)*mm; // area = 150mm^2 = pi*r^2
+  G4double sens_sphi = 0.0;
+  G4double sens_dphi = 2.0*M_PI;
+  G4Transform3D sens_internal_rotate = G4Rotate3D();
+  G4Transform3D sens_internal_translate = G4Translate3D(0.0, 0.0, -sens_depth-0.5*sens_dz);
+  G4Transform3D sens_total_transform = global_transform*sens_internal_translate*sens_internal_rotate;
+  
+  // Be entrance window
+  G4double window_dz = 0.025*mm;
+  G4double window_rmin = sens_rmin;
+  G4double window_rmax = sens_rmax;
+  G4double window_sphi = sens_sphi;
+  G4double window_dphi = sens_dphi;
+  G4Transform3D window_internal_rotate = G4Rotate3D();
+  G4Transform3D window_internal_translate = G4Translate3D(0.0, 0.0, -sens_depth+0.5*window_dz);
+  G4Transform3D window_total_transform = global_transform*window_internal_translate*window_internal_rotate;
+
+  G4Tubs* sens_solid = new G4Tubs("solidSDD", sens_rmin, sens_rmax, 0.5*sens_dz, sens_sphi, sens_dphi);
+  G4LogicalVolume *sens_logical = new G4LogicalVolume(sens_solid, mat["Si"], "logicSDD");
+  sens_logical->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
+  new G4PVPlacement(sens_total_transform, sens_logical, "physiSDD", mother_logical, false, 0, checkOverlaps);
+
+  G4Tubs* window_solid = new G4Tubs("solidBeWindow", window_rmin, window_rmax, 0.5*window_dz, window_sphi, window_dphi);
+  G4LogicalVolume *window_logical = new G4LogicalVolume(window_solid, mat["Be"], "logicBeWindow");
+  new G4PVPlacement(window_total_transform, window_logical, "physiBeWindow", mother_logical, false, 0, checkOverlaps);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
-  //
-  // define a material
-  //   
-  G4Material* Air =
-  G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR"); 
+  // Option to switch on/off checking of volumes overlaps
+  checkOverlaps = true;
 
-  G4Material* mat_Ge = 
-  G4NistManager::Instance()->FindOrBuildMaterial("G4_Ge");
-  
-  G4Material* mat_Si = 
-  G4NistManager::Instance()->FindOrBuildMaterial("G4_Si");
+  // define materials
+  BuildMaterials();
   
   //     
   // World
@@ -79,7 +134,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                    
   G4LogicalVolume*                         
   logicWorld = new G4LogicalVolume(solidWorld,             //its solid
-                                   Air,                    //its material
+                                   mat["air"],             //its material
                                    "World");               //its name
   G4VPhysicalVolume*                                   
   physiWorld = new G4PVPlacement(0,                      //no rotation
@@ -109,26 +164,18 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Tubs* solidGe = new G4Tubs("solidHPGe",
     HPGe_rmin, HPGe_rmax, HPGe_dz/2, HPGe_sphi, HPGe_dphi);
   G4LogicalVolume* logicGe = new G4LogicalVolume(
-    solidGe, mat_Ge, "logicHPGe");
+    solidGe, mat["Ge"], "logicHPGe");
   G4VPhysicalVolume* physiGe = new G4PVPlacement(
     0, *HPGe_trans, logicGe, "physiGe", logicWorld, false, 0);
 
   //
   // SDD
   //
-  G4double SDD_rmin = 0.0;
-  G4double SDD_rmax = 6.9*mm;
-  G4double SDD_dz = 0.45*mm;
-  G4double SDD_sphi = 0.0;
-  G4double SDD_dphi = 2.0*M_PI;
-  G4ThreeVector* SDD_trans = new G4ThreeVector(
-    0, 0, 10.0*mm);
-  G4Tubs* solidSi = new G4Tubs("solidSDD", 
-    SDD_rmin, SDD_rmax, SDD_dz/2, SDD_sphi, SDD_dphi);
-  G4LogicalVolume* logicSi = new G4LogicalVolume(
-    solidSi, mat_Si, "logicSDD");
-  G4VPhysicalVolume* physiSi = new G4PVPlacement(
-    0, *SDD_trans, logicSi, "physiSi", logicWorld, false, 0);
+  G4Transform3D SDD_translate = G4Translate3D(0.0,0.0,0.0);
+  //G4Transform3D SDD_rotate = G4RotateY3D(-0.5*M_PI);
+  G4Transform3D SDD_rotate = G4RotateX3D(M_PI);
+  G4Transform3D SDD_transform = SDD_translate*SDD_rotate;
+  ConstructXrayDetector(logicWorld, SDD_transform);
 
   //
   //always return the physical World
