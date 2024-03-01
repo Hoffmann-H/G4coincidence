@@ -1,17 +1,11 @@
 /control/verbose 2
 /run/verbose 0
 #
-/gun/particle ion
-#/gun/ion 10 24 # Ne-24
-#/gun/ion 55 137 # Cs-137
-#/gun/ion 27 57 # Co-57
-#/gun/ion 33 76 # As-76
-/gun/ion 32 76 0 562.93 # Ge-76 1st exc.st.
-#/gun/particle e-
-#/gun/energy 1000 keV
-#/gun/direction 0 0 1
+/primary/ion 33 73
+#/primary/ion 33 76
+#/primary/ECbranching 1.0
 #
-/histo/file results/As-76.root
+/histo/file results/As-73.root
 #
 /run/printProgress 10000
 #  

@@ -32,6 +32,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "PrimaryGenerator.hh"
+#include "PrimaryMessenger.hh"
 
 #include "G4Event.hh"
 #include "G4ParticleTable.hh"
@@ -48,7 +49,14 @@
 
 PrimaryGenerator::PrimaryGenerator()
 : G4VPrimaryGenerator()
-{ }
+{ 
+    primaryMessenger = new PrimaryMessenger(this);
+
+    // Primary particle standard values
+    ionZ = 33;
+    ionA = 76;
+    ECbranching = 0.0;
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -57,65 +65,74 @@ PrimaryGenerator::~PrimaryGenerator()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+void PrimaryGenerator::SetIonZandA(G4int Z, G4int A)
+{
+  ionZ = Z;
+  ionA = A;
+}
+void PrimaryGenerator::SetECbranching(G4double branching)
+{
+  ECbranching = branching;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 void PrimaryGenerator::GeneratePrimaryVertex(G4Event* event)
 {
   //vertex position
-  //
   G4ThreeVector position(0.0,0.0,0.0);
-  G4double timeA = 0.0;
-  // 
-  G4PrimaryVertex* vertexA = new G4PrimaryVertex(1.0*cm,0,0, timeA);
   
+  // randomly choose original ion or hand-made EC according to branching ratio
+  G4double random_number = CLHEP::RandFlat::shoot(0.0, 1.0);
+  if (random_number > ECbranching)
+  // Ordinary G4 ion decay
+  {
+    // Vertex at position and time
+    G4double timeA = 0.0*s;
+    G4PrimaryVertex* vertexA = new G4PrimaryVertex(1.0*cm,0,0, timeA);
     // Getting ion from ion table
-    G4int Z = 33, A = 76;
     G4double ionCharge   = 0.*eplus;
     G4double excitEnergy = 0.*keV;
-    G4ParticleDefinition* ionA
-       = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
-    // Output if ion decay table is ready... No.
-    G4DecayTable* ionDecayTable = ionA->GetDecayTable();
-    if (ionDecayTable) {
-      G4int n = ionDecayTable->entries();
-      G4cout << "ionDecayTable->entries():" << n << G4endl;
-    } else {
-      G4cout << "No ionDecayTable!" << G4endl;
-    }
+    G4ParticleDefinition* theIon
+        = G4IonTable::GetIonTable()->GetIon(ionZ,ionA,excitEnergy);
 
-  //particle 1 at vertex A - ion for beta- decay
-  //
-  G4PrimaryParticle* particle1 = new G4PrimaryParticle(ionA);
-  particle1->SetMomentumDirection(G4ThreeVector(1,0,0));
-  particle1->SetKineticEnergy(0*MeV);
-  //
-  vertexA->SetPrimary(particle1);
-  event->AddPrimaryVertex(vertexA);
-  
-  //vertex (B) position
-  //
-  G4double timeB = 0.0*s;
-  // 
-  G4PrimaryVertex* vertexB = new G4PrimaryVertex(position, timeB);
-  
-  //particles 2 and 3 at vertex B - EC X-rays and excited doughter nucleus
-  //
+    //particle 1 at vertex A - ion for beta- decay
+    //
+    G4PrimaryParticle* particle1 = new G4PrimaryParticle(theIon);
+    particle1->SetMomentumDirection(G4ThreeVector(1,0,0));
+    particle1->SetKineticEnergy(0*MeV);
+    //
+    vertexA->SetPrimary(particle1);
+    event->AddPrimaryVertex(vertexA);
+  } else
+  // hand-made EC
+  {
+    // Vertex position
+    G4double timeB = 0.0*s;
+    G4PrimaryVertex* vertexB = new G4PrimaryVertex(position, timeB);
+    
+    // Particles 2 and 3 at vertex B - EC X-rays and excited doughter nucleus
     // Getting ion from ion table
-    Z = 32, A = 76;
-    ionCharge   = 0.*eplus;
-    excitEnergy = 562.93*keV;
-    G4ParticleDefinition* ionB
-        = G4IonTable::GetIonTable()->GetIon(Z,A,excitEnergy);
-  G4PrimaryParticle* particle2 = new G4PrimaryParticle(ionB);
-  particle2->SetKineticEnergy(0.0);
-  //
-  G4ParticleDefinition* photon
-    = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
-  G4PrimaryParticle* particle3 = new G4PrimaryParticle(photon);
-  particle3->SetMomentumDirection(G4ThreeVector(0,0,1));    
-  particle3->SetKineticEnergy(9.8*keV);
-  //
-  vertexB->SetPrimary(particle2);
-  vertexB->SetPrimary(particle3);  
-  event->AddPrimaryVertex(vertexB);
+    G4double ionCharge   = 0.*eplus;
+    G4double excitEnergy = 562.93*keV;
+    G4ParticleDefinition* theIon
+        = G4IonTable::GetIonTable()->GetIon(ionZ-1,ionA,excitEnergy);
+    G4PrimaryParticle* particle2 = new G4PrimaryParticle(theIon);
+    particle2->SetKineticEnergy(0.0);
+    // Add X-ray by hand
+    G4ParticleDefinition* photon
+      = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
+    G4PrimaryParticle* particle3 = new G4PrimaryParticle(photon);
+    // random direction (isotropic)
+    G4double phi = CLHEP::RandFlat::shoot(0.0, 2.0*M_PI);     // phi uniform
+    G4double theta = acos(CLHEP::RandFlat::shoot(-1.0, 1.0)); // theta sine distributed
+    particle3->SetMomentumDirection(G4ThreeVector(sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)));    
+    particle3->SetKineticEnergy(9.8*keV);
+    //
+    vertexB->SetPrimary(particle2);
+    vertexB->SetPrimary(particle3);  
+    event->AddPrimaryVertex(vertexB);
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

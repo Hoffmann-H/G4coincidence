@@ -36,6 +36,7 @@
 
 #include "G4VPrimaryGenerator.hh"
 
+class PrimaryMessenger;
 class G4Event;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -44,10 +45,17 @@ class PrimaryGenerator : public G4VPrimaryGenerator
 {
   public:
     PrimaryGenerator();    
-   ~PrimaryGenerator();
+    ~PrimaryGenerator();
+    void SetIonZandA(G4int Z, G4int A);
+    void SetECbranching(G4double branching);
 
   public:
+    PrimaryMessenger* primaryMessenger;
     virtual void GeneratePrimaryVertex(G4Event*);
+
+  private:
+    G4int ionZ, ionA;
+    G4double ECbranching;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
