@@ -30,11 +30,9 @@
 #
 # Specify style (surface or wireframe):
 /vis/viewer/set/style surface
+#
 # make the world volume transparent
 /vis/geometry/set/colour World 0 1 1 1 0.01
-#
-# Draw coordinate axes:
-#/vis/scene/add/axes 0 0 0 1 m
 #
 # Draw smooth trajectories at end of event, showing trajectory points
 # as markers 2 pixels wide:
@@ -76,5 +74,8 @@
 #
 # For file-based drivers, use this to create an empty detector view:
 #/vis/viewer/flush
+#
 # show spatial axes
 #/vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
+#
+#/vis/viewer/addCutawayPlane 0 0 0 cm 0 1 0

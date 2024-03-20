@@ -56,6 +56,7 @@ PrimaryGenerator::PrimaryGenerator()
     ionZ = 33;
     ionA = 76;
     ECbranching = 0.0;
+    daughterExcitEnergy = 0.0*keV;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -74,11 +75,17 @@ void PrimaryGenerator::SetECbranching(G4double branching)
 {
   ECbranching = branching;
 }
+void PrimaryGenerator::SetDaughterExcitEnergy(G4double excitEnergy)
+{
+  daughterExcitEnergy = excitEnergy;
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void PrimaryGenerator::GeneratePrimaryVertex(G4Event* event)
 {
+  // experimental: Tr
+
   //vertex position
   G4ThreeVector position(0.0,0.0,0.0);
   
@@ -92,7 +99,7 @@ void PrimaryGenerator::GeneratePrimaryVertex(G4Event* event)
     G4PrimaryVertex* vertexA = new G4PrimaryVertex(position, timeA);
     // Getting ion from ion table
     G4double ionCharge   = 0.*eplus;
-    G4double excitEnergy = 0.*keV;
+    G4double excitEnergy = 0.0*keV;
     G4ParticleDefinition* theIon
         = G4IonTable::GetIonTable()->GetIon(ionZ,ionA,excitEnergy);
 
@@ -114,7 +121,7 @@ void PrimaryGenerator::GeneratePrimaryVertex(G4Event* event)
     // Particles 2 and 3 at vertex B - EC X-rays and excited doughter nucleus
     // Getting ion from ion table
     G4double ionCharge   = 0.*eplus;
-    G4double excitEnergy = 562.93*keV;
+    G4double excitEnergy = daughterExcitEnergy;
     G4ParticleDefinition* theIon
         = G4IonTable::GetIonTable()->GetIon(ionZ-1,ionA,excitEnergy);
     G4PrimaryParticle* particle2 = new G4PrimaryParticle(theIon);

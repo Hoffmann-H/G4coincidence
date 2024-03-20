@@ -48,6 +48,7 @@ class PrimaryGenerator : public G4VPrimaryGenerator
     ~PrimaryGenerator();
     void SetIonZandA(G4int Z, G4int A);
     void SetECbranching(G4double branching);
+    void SetDaughterExcitEnergy(G4double excitEnergy);
 
   public:
     PrimaryMessenger* primaryMessenger;
@@ -56,6 +57,7 @@ class PrimaryGenerator : public G4VPrimaryGenerator
   private:
     G4int ionZ, ionA;
     G4double ECbranching;
+    G4double daughterExcitEnergy;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

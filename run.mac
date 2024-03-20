@@ -1,12 +1,20 @@
 /control/verbose 2
 /run/verbose 0
 #
-/primary/ion 33 73
-#/primary/ion 33 76
-#/primary/ECbranching 1.0
+#/primary/ion 11 22
+#/primary/ion 55 137
+#/primary/ion 27 57
+#/primary/ion 56 133
+#/primary/ion 33 73
+/primary/ion 33 76
+/primary/ECbranching 0.0
+#/primary/daughterExcitEnergy 0.0 keV
 #
-/histo/file results/As-73.root
+#/histo/file results/Cs-137.root
+#/histo/file results/Co-57.root
+#/histo/file results/Ba-133.root
+/histo/file results/TU2_39mm_beta_1E7.root
 #
-/run/printProgress 10000
-#  
-/run/beamOn 100000
+/run/printProgress 100000
+#
+/run/beamOn 10000000

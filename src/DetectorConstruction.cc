@@ -26,7 +26,7 @@
 /// \file DetectorConstruction.cc
 /// \brief Implementation of the DetectorConstruction class
 //
-// 
+//
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -36,6 +36,7 @@
 #include "G4Material.hh"
 #include "G4Box.hh"
 #include "G4Tubs.hh"
+#include "G4Polycone.hh"
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
 #include "G4SystemOfUnits.hh"
@@ -65,36 +66,44 @@ void DetectorConstruction::BuildMaterials()
 { // Define materials via NIST manager
   auto nist = G4NistManager::Instance();
   mat["Ge"] = nist->FindOrBuildMaterial("G4_Ge");
-  mat["alu"] = nist->FindOrBuildMaterial("G4_Al");
+  mat["Al"] = nist->FindOrBuildMaterial("G4_Al");
   mat["Si"] = nist->FindOrBuildMaterial("G4_Si");
   mat["Be"] = nist->FindOrBuildMaterial("G4_Be");
   mat["air"] = nist->FindOrBuildMaterial("G4_AIR");
   mat["Pb"] = nist->FindOrBuildMaterial("G4_Pb");
+  mat["Cu"] = nist->FindOrBuildMaterial("G4_Cu");
   mat["concrete"] = nist->FindOrBuildMaterial("G4_CONCRETE");
   mat["PMMA"] = nist->FindOrBuildMaterial("G4_PLEXIGLASS");
-  mat["Cu"] = nist->FindOrBuildMaterial("G4_Cu");
+  mat["polycarbonate"] = nist->FindOrBuildMaterial("G4_POLYCARBONATE");
+  G4Element* As = nist->FindOrBuildElement(33);
+  G4Element* O = nist->FindOrBuildElement(8);
+  mat["As2O3"] = new G4Material("As2O3", 3.74*g/cm3, 2, kStateSolid);
+  mat["As2O3"]->AddElement(As, 2);
+  mat["As2O3"]->AddElement(O, 3);
+
   //G4Ele
   //TODO: peltier, tantalum collimator
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::ConstructXrayDetector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
-// Construct the SDD X-ray detector, 
-// with frontent point at given frontend_position and given rotation. 
+void DetectorConstruction::ConstructTU5Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+// Construct the SDD X-ray detector,
+// with frontent point at given frontend_position and given rotation.
 // frontend point := intersection of sensor rotation axis with front layer of housing
 {
   // Si sensitive part
   G4double sens_depth = 3.94*mm; // distance between front layer of housing and front layer of Si sensor
   G4double sens_dz = 0.45*mm;
   G4double sens_rmin = 0.0*mm;
-  G4double sens_rmax = sqrt(150.0/M_PI)*mm; // area = 150mm^2 = pi*r^2
+  //G4double sens_rmax = sqrt(150.0/M_PI)*mm; // area = 150mm^2 = pi*r^2
+  G4double sens_rmax = 3.96*mm;// naively tuned in order to match experimental efficiency
   G4double sens_sphi = 0.0;
   G4double sens_dphi = 2.0*M_PI;
   G4Transform3D sens_internal_rotate = G4Rotate3D();
   G4Transform3D sens_internal_translate = G4Translate3D(0.0, 0.0, -sens_depth-0.5*sens_dz);
   G4Transform3D sens_total_transform = global_transform*sens_internal_translate*sens_internal_rotate;
-  
+
   // Be entrance window
   G4double window_dz = 0.025*mm;
   G4double window_rmin = sens_rmin;
@@ -115,6 +124,184 @@ void DetectorConstruction::ConstructXrayDetector(G4LogicalVolume* mother_logical
   new G4PVPlacement(window_total_transform, window_logical, "physiBeWindow", mother_logical, false, 0, checkOverlaps);
 }
 
+void DetectorConstruction::ConstructTU4Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+{
+  // HPGe properties as written in data sheet
+  G4double HPGe_crystal_diameter = 58.7*mm;
+  G4double HPGe_crystal_length = 71.1*mm;
+  G4double HPGe_end_cap_to_crystal = 3.0*mm;
+  G4double HPGe_end_cap_thickness = 2.0*mm;
+  G4double HPGe_dead_layer = 1.65*mm;//0.3*mm;// naively tuned in order to match experimental efficiency
+
+  // crystal
+  G4double crystal_rmin = 0.0;
+  G4double crystal_rmax = 0.5*HPGe_crystal_diameter;
+  G4double crystal_dz = HPGe_crystal_length;
+  G4Transform3D crystal_internal_rotate = G4Rotate3D();
+  G4Transform3D crystal_internal_translate = G4Translate3D(0.0, 0.0,
+    -0.5*HPGe_crystal_length - HPGe_end_cap_thickness - HPGe_end_cap_to_crystal);
+  G4Transform3D crystal_total_transform = global_transform*crystal_internal_translate*crystal_internal_rotate;
+  G4Tubs* solidCrystal = new G4Tubs("solidCrystal",
+    crystal_rmin, crystal_rmax, crystal_dz/2, 0, 2*M_PI);
+  G4LogicalVolume* logicCrystal = new G4LogicalVolume(
+    solidCrystal, mat["Ge"], "logicCrystal");
+  G4VPhysicalVolume* physiCrystal = new G4PVPlacement(
+    crystal_total_transform, logicCrystal, "physiCrystal", mother_logical, false, 0);
+
+  // sensitive part of crystal
+  G4double sens_rmin = 0.0;
+  G4double sens_rmax = 0.5*HPGe_crystal_diameter - HPGe_dead_layer;
+  G4double sens_dz = HPGe_crystal_length - 2.0*HPGe_dead_layer;
+
+  G4Tubs* solidSens = new G4Tubs("solidHPGe",
+    sens_rmin, sens_rmax, sens_dz/2, 0, 2*M_PI);
+  G4LogicalVolume* logicSens = new G4LogicalVolume(
+    solidSens, mat["Ge"], "logicHPGe");
+  logicSens->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
+  G4VPhysicalVolume* physiSens = new G4PVPlacement(
+    0, G4ThreeVector(), logicSens, "physiHPGe", logicCrystal, false, 0);
+
+  // end cap
+  const int cap_num_planes = 4;
+  const G4double cap_z_plane[cap_num_planes] = {0.0,
+    -HPGe_end_cap_thickness,
+    -HPGe_end_cap_thickness,
+    -HPGe_end_cap_thickness-HPGe_end_cap_to_crystal-HPGe_crystal_length};
+  const G4double cap_inner_r[cap_num_planes] = {0.0, 0.0,
+    HPGe_crystal_diameter/2+HPGe_end_cap_to_crystal,
+    HPGe_crystal_diameter/2+HPGe_end_cap_to_crystal};
+  const G4double cap_outer_r[cap_num_planes] = {
+    HPGe_crystal_diameter/2+HPGe_end_cap_to_crystal+HPGe_end_cap_thickness,
+    HPGe_crystal_diameter/2+HPGe_end_cap_to_crystal+HPGe_end_cap_thickness,
+    HPGe_crystal_diameter/2+HPGe_end_cap_to_crystal+HPGe_end_cap_thickness,
+    HPGe_crystal_diameter/2+HPGe_end_cap_to_crystal+HPGe_end_cap_thickness};
+  G4Transform3D cap_total_transform = global_transform;
+  G4Polycone* solidCap = new G4Polycone("solidCap", 0, 2*M_PI,
+    cap_num_planes, cap_z_plane, cap_inner_r, cap_outer_r);
+  G4LogicalVolume* logicCap = new G4LogicalVolume(
+    solidCap, mat["Al"], "logicCap");
+  G4VPhysicalVolume* physiCap = new G4PVPlacement(
+    cap_total_transform, logicCap, "physiCap", mother_logical, false, 0);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::ConstructTU2Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+{
+  // HPGe properties as written in data sheet
+  G4double HPGe_crystal_diameter = 72*mm;
+  G4double HPGe_crystal_length = 65*mm;
+  G4double HPGe_crystal_well_diameter = 21*mm;
+  G4double HPGe_crystal_well_depth = 40*mm;
+  G4double HPGe_cap_to_crystal_outside = 10.0*mm;
+  G4double HPGe_cap_to_crystal_front = 0.01*mm; // guessed
+  G4double HPGe_cap_to_crystal_inside = 0.01*mm; // guessed
+  G4double HPGe_cap_thickness = 2.0*mm; // guessed
+  G4double HPGe_dead_layer = 0.3*mm; // guessed
+
+  // crystal
+  const int crystal_num_planes = 4;
+  const G4double crystal_z_plane[crystal_num_planes] = {0.0,
+    -HPGe_crystal_well_depth,
+    -HPGe_crystal_well_depth,
+    -HPGe_crystal_length};
+  const G4double crystal_inner_r[crystal_num_planes] = {
+    HPGe_crystal_well_diameter/2,
+    HPGe_crystal_well_diameter/2,
+    0.0, 0.0};
+  const G4double crystal_outer_r[crystal_num_planes] = {
+    HPGe_crystal_diameter/2,
+    HPGe_crystal_diameter/2,
+    HPGe_crystal_diameter/2,
+    HPGe_crystal_diameter/2};
+  G4Transform3D crystal_internal_translate = G4Translate3D(0.0, 0.0,
+    - HPGe_cap_thickness - HPGe_cap_to_crystal_front);
+  G4Transform3D crystal_total_transform = global_transform*crystal_internal_translate;
+  G4Polycone* solidCrystal = new G4Polycone("solidCrystal", 0, 2*M_PI,
+    crystal_num_planes, crystal_z_plane, crystal_inner_r, crystal_outer_r);
+  G4LogicalVolume* logicSens = new G4LogicalVolume(
+    solidCrystal, mat["Ge"], "logicHPGe");
+  logicSens->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
+  G4VPhysicalVolume* physiSens = new G4PVPlacement(
+    crystal_total_transform, logicSens, "physiHPGe", mother_logical, false, 0);
+
+  // end cap
+  const int cap_num_planes = 6;
+  const G4double cap_z_plane[cap_num_planes] = {0.0,
+    -HPGe_cap_thickness,
+    -HPGe_cap_thickness,
+    -HPGe_crystal_well_depth,
+    -HPGe_crystal_well_depth,
+    -HPGe_cap_thickness-HPGe_crystal_well_depth};
+  const G4double cap_inner_r[cap_num_planes] = {
+    HPGe_crystal_well_diameter/2-HPGe_cap_to_crystal_inside-HPGe_cap_thickness,
+    HPGe_crystal_well_diameter/2-HPGe_cap_to_crystal_inside-HPGe_cap_thickness,
+    HPGe_crystal_well_diameter/2-HPGe_cap_to_crystal_inside-HPGe_cap_thickness,
+    HPGe_crystal_well_diameter/2-HPGe_cap_to_crystal_inside-HPGe_cap_thickness,
+    0.0, 0.0};
+  const G4double cap_outer_r[cap_num_planes] = {
+    HPGe_crystal_diameter/2+HPGe_cap_to_crystal_outside,
+    HPGe_crystal_diameter/2+HPGe_cap_to_crystal_outside,
+    HPGe_crystal_well_diameter/2-HPGe_cap_to_crystal_inside,
+    HPGe_crystal_well_diameter/2-HPGe_cap_to_crystal_inside,
+    HPGe_crystal_well_diameter/2-HPGe_cap_to_crystal_inside,
+    HPGe_crystal_well_diameter/2-HPGe_cap_to_crystal_inside};
+  G4Transform3D cap_total_transform = global_transform;
+  G4Polycone* solidCap = new G4Polycone("solidCap", 0, 2*M_PI,
+    cap_num_planes, cap_z_plane, cap_inner_r, cap_outer_r);
+  G4LogicalVolume* logicCap = new G4LogicalVolume(
+    solidCap, mat["Al"], "logicCap");
+  G4VPhysicalVolume* physiCap = new G4PVPlacement(
+    cap_total_transform, logicCap, "physiCap", mother_logical, false, 0);
+
+  // outer cap
+  G4double outer_cap_inner_r = HPGe_crystal_diameter/2 + HPGe_cap_to_crystal_outside;
+  G4double outer_cap_outer_r = outer_cap_inner_r + HPGe_cap_thickness;
+  G4double outer_cap_dz = HPGe_crystal_length + HPGe_cap_to_crystal_front + HPGe_cap_thickness;
+  G4Transform3D outer_cap_internal_transform = G4Translate3D(
+    0.0, 0.0, -outer_cap_dz/2);
+  G4Transform3D outer_cap_total_transform = global_transform*outer_cap_internal_transform;
+  G4Tubs* solidOuter = new G4Tubs("solidOuter", outer_cap_inner_r, outer_cap_outer_r, 0.5*outer_cap_dz, 0.0, 2.0*M_PI);
+  G4LogicalVolume *logicOuter = new G4LogicalVolume(solidOuter, mat["Al"], "logicOuter");
+  new G4PVPlacement(outer_cap_total_transform, logicOuter, "physiOuter", mother_logical, false, 0, checkOverlaps);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::ConstructAsContainer(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+// Construct the polycarbonate sample holder including As.
+// Central point equals the central point of the As layer.
+{
+  G4double As_thickness = 0.137*mm; // 195 mg of 3.74 g/cm3 in a cylinder of r=1.1cm
+  G4double As_radius = 11.0*mm;
+  G4double cont_window_thickness = 1.0*mm;
+  G4double cont_total_z = 8.0*mm;
+  G4double cont_total_r = 12.0*mm;
+  G4double ring_inner_r = 9.0*mm;
+  G4double bottom = -cont_window_thickness - 0.5*As_thickness; // z coordinate
+
+  // construct the container
+  const int cont_num_planes = 4;
+  const G4double cont_z_plane[] = {bottom+cont_total_z, -bottom, -bottom, bottom};
+  const G4double cont_inner_r[] = {ring_inner_r, ring_inner_r, 0.0, 0.0};
+  const G4double cont_outer_r[] = {cont_total_r, cont_total_r, cont_total_r, cont_total_r};
+  G4Polycone* solidCont = new G4Polycone("solidCont", 0.0, 2*M_PI,
+    cont_num_planes, cont_z_plane, cont_inner_r, cont_outer_r);
+  G4LogicalVolume* logicCont = new G4LogicalVolume(
+    solidCont, mat["polycarbonate"], "logicCont");
+  G4VPhysicalVolume* physiCont = new G4PVPlacement(
+    global_transform, logicCont, "physiCont", mother_logical, false, 0);
+
+  // Place the As layer into the container
+  G4Tubs* solidSample = new G4Tubs("solidSample",
+    0, As_radius, As_thickness/2, 0, 2*M_PI);
+  G4LogicalVolume* logicSample = new G4LogicalVolume(
+    solidSample, mat["As2O3"], "logicSample");
+  logicSample->SetVisAttributes(new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)));
+  G4VPhysicalVolume* physiSample = new G4PVPlacement(
+    G4Transform3D(), logicSample, "physiSample", logicCont, false, 0);
+}
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4VPhysicalVolume* DetectorConstruction::Construct()
@@ -124,19 +311,19 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   // define materials
   BuildMaterials();
-  
-  //     
+
+  //
   // World
   //
-  G4Box*  
+  G4Box*
   solidWorld = new G4Box("World",                          //its name
                    fWorldSize/2,fWorldSize/2,fWorldSize/2);//its size
-                   
-  G4LogicalVolume*                         
+
+  G4LogicalVolume*
   logicWorld = new G4LogicalVolume(solidWorld,             //its solid
                                    mat["air"],             //its material
                                    "World");               //its name
-  G4VPhysicalVolume*                                   
+  G4VPhysicalVolume*
   physiWorld = new G4PVPlacement(0,                      //no rotation
                                  G4ThreeVector(),        //at (0,0,0)
                                  logicWorld,             //its logical volume
@@ -144,42 +331,44 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                                  0,                      //its mother  volume
                                  false,                  //no boolean operation
                                  0);                     //copy number
-  // 
+  //
   // radioactive sample
   //
+  G4Transform3D As_translate = G4Translate3D();
+  G4Transform3D As_rotate = G4RotateY3D(-0.5*M_PI);
+  G4Transform3D As_transform = As_translate*As_rotate;
+  //ConstructAsContainer(logicWorld, As_transform);
 //TODO
   // store source logical volume
   //fSourceVolume = logicSample;
 
-  // 
+
+  //
   // HPGe
   //
-  G4double HPGe_rmin = 0.0;
-  G4double HPGe_rmax = 45.0 * mm;
-  G4double HPGe_dz = 160.0 * mm;
-  G4double HPGe_sphi = 0.0;
-  G4double HPGe_dphi = 2*M_PI;
-  G4ThreeVector* HPGe_trans = new G4ThreeVector(
-    0, 0, -90.0*mm);
-  G4Tubs* solidGe = new G4Tubs("solidHPGe",
-    HPGe_rmin, HPGe_rmax, HPGe_dz/2, HPGe_sphi, HPGe_dphi);
-  G4LogicalVolume* logicGe = new G4LogicalVolume(
-    solidGe, mat["Ge"], "logicHPGe");
-  G4VPhysicalVolume* physiGe = new G4PVPlacement(
-    0, *HPGe_trans, logicGe, "physiGe", logicWorld, false, 0);
+  //G4Transform3D TU4_translate = G4Translate3D(0.0,0.0,-17.9*mm);
+  //G4Transform3D TU4_rotate = G4Rotate3D();
+  //G4Transform3D TU4_transform = TU4_translate*TU4_rotate;
+  //ConstructTU4Detector(logicWorld, TU4_transform);
+
+  G4Transform3D TU2_translate = G4Translate3D(0.0,0.0,39.0*mm);
+  G4Transform3D TU2_rotate = G4Rotate3D();
+  G4Transform3D TU2_transform = TU2_translate*TU2_rotate;
+  ConstructTU2Detector(logicWorld, TU2_transform);
 
   //
   // SDD
   //
-  G4Transform3D SDD_translate = G4Translate3D(0.0,0.0,0.0);
+  //G4Transform3D SDD_translate = G4Translate3D(3.0*mm,0.0,0.0);
   //G4Transform3D SDD_rotate = G4RotateY3D(-0.5*M_PI);
-  G4Transform3D SDD_rotate = G4RotateX3D(M_PI);
+  G4Transform3D SDD_translate = G4Translate3D(0.0, 0.0, 39.0*mm);
+  G4Transform3D SDD_rotate = G4RotateY3D(M_PI);
   G4Transform3D SDD_transform = SDD_translate*SDD_rotate;
-  ConstructXrayDetector(logicWorld, SDD_transform);
+  ConstructTU5Detector(logicWorld, SDD_transform);
 
   //
   //always return the physical World
-  //  
+  //
   return physiWorld;
 }
 

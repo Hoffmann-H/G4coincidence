@@ -38,6 +38,7 @@
 #include "G4UIparameter.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithADouble.hh"
+#include "G4UIcmdWithADoubleAndUnit.hh"
 #include "G4Tokenizer.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -56,13 +57,20 @@ PrimaryMessenger::PrimaryMessenger(PrimaryGenerator* Primary)
   fPrimaryECbranchingCmd = new G4UIcmdWithADouble("/primary/ECbranching",this);
   fPrimaryECbranchingCmd->SetGuidance("define branching ratio of hand-made EC");
   fPrimaryECbranchingCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  fDaughterExcitEnergyCmd = new G4UIcmdWithADoubleAndUnit("/primary/daughterExcitEnergy",this);
+  fDaughterExcitEnergyCmd->SetGuidance("define excitation energy of EC daughter nucleus");
+  fDaughterExcitEnergyCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryMessenger::~PrimaryMessenger()
 {
-  //delete fPrimaryWriteCmd;
+  delete fPrimaryDir;
+  delete fPrimaryIonCmd;
+  delete fPrimaryECbranchingCmd;
+  delete fDaughterExcitEnergyCmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -80,6 +88,10 @@ void PrimaryMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   if (command == fPrimaryECbranchingCmd)
   {
       fPrimary->SetECbranching(fPrimaryECbranchingCmd->GetNewDoubleValue(newValue));
+  }
+  if (command == fDaughterExcitEnergyCmd)
+  {
+      fPrimary->SetDaughterExcitEnergy(fDaughterExcitEnergyCmd->GetNewDoubleValue(newValue));
   }
 }
 

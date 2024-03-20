@@ -43,6 +43,7 @@ class G4UIdirectory;
 class G4UIcommand;
 class G4UIcmdWithAString;
 class G4UIcmdWithADouble;
+class G4UIcmdWithADoubleAndUnit;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -62,6 +63,7 @@ class PrimaryMessenger: public G4UImessenger
     G4UIdirectory*               fPrimaryDir;
     G4UIcmdWithAString*          fPrimaryIonCmd;
     G4UIcmdWithADouble*          fPrimaryECbranchingCmd;
+    G4UIcmdWithADoubleAndUnit*   fDaughterExcitEnergyCmd;
     //G4UIcmdWithABool*          fPrimaryWriteCmd;
     //G4UIcmdWithABool*          fTTreeWriteCmd;
     //G4UIcmdWithAString*        fFilenameCmd;

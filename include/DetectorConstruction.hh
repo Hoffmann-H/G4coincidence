@@ -57,7 +57,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
   private:
     void BuildMaterials();
-    void ConstructXrayDetector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
+    void ConstructTU5Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
+    void ConstructTU4Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
+    void ConstructTU2Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
+    void ConstructAsContainer(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
   
     G4bool checkOverlaps;
     G4double fWorldSize;
