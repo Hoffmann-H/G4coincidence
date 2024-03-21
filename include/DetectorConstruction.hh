@@ -38,6 +38,7 @@
 #include "G4Transform3D.hh"
 #include <map>
 
+class DetectorMessenger;
 class G4VPhysicalVolume;
 class G4LogicalVolume;
 class G4Material;
@@ -55,12 +56,18 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* Construct();
     virtual void ConstructSDandField();
 
+    void SetConstructPart(G4int part_index, G4String axis, G4double rot, G4double x, G4double y, G4double z);
+    
   private:
+    DetectorMessenger *fDetectorMessenger;
     void BuildMaterials();
     void ConstructTU5Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructTU4Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructTU2Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructAsContainer(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
+
+    G4bool fDoConstruct[4]; // TU2, TU4, TU5, sample
+    G4Transform3D fTransformPart[4];
   
     G4bool checkOverlaps;
     G4double fWorldSize;

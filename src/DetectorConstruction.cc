@@ -31,6 +31,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "DetectorConstruction.hh"
+#include "DetectorMessenger.hh"
 
 #include "G4NistManager.hh"
 #include "G4Material.hh"
@@ -53,12 +54,40 @@ DetectorConstruction::DetectorConstruction()
  : G4VUserDetectorConstruction()
 {
   fWorldSize = 1.0*m;
+  fDetectorMessenger = new DetectorMessenger(this);
+
+  // standard setup
+  fDoConstruct[0] = false;
+  fDoConstruct[1] = true;
+  fDoConstruct[2] = true;
+  fDoConstruct[3] = false;
+  G4Transform3D TU4_translate = G4Translate3D(0.0,0.0,-17.9*mm);
+  G4Transform3D TU4_rotate = G4Rotate3D();
+  fTransformPart[1] = TU4_translate*TU4_rotate;
+  G4Transform3D TU5_translate = G4Translate3D(3.0*mm,0.0,0.0);
+  G4Transform3D TU5_rotate = G4RotateY3D(-0.5*M_PI);
+  fTransformPart[2] = TU5_translate*TU5_rotate;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::~DetectorConstruction()
 {}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::SetConstructPart(G4int part_index, G4String axis, G4double rot, G4double x, G4double y, G4double z)
+{
+    if (part_index == 0) fDoConstruct[1] = false; // construct only 1 HPGe
+    if (part_index == 1) fDoConstruct[0] = false;
+    fDoConstruct[part_index] = true;
+    G4Transform3D rotate = G4Rotate3D();
+    if (axis == "X") rotate = G4RotateX3D(rot/180.*M_PI);
+    if (axis == "Y") rotate = G4RotateY3D(rot/180.*M_PI);
+    if (axis == "Z") rotate = G4RotateZ3D(rot/180.*M_PI);
+    G4Transform3D translate = G4Translate3D(x*mm, y*mm, z*mm);
+    fTransformPart[part_index] = translate*rotate;
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -331,40 +360,29 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                                  0,                      //its mother  volume
                                  false,                  //no boolean operation
                                  0);                     //copy number
-  //
-  // radioactive sample
-  //
-  G4Transform3D As_translate = G4Translate3D();
-  G4Transform3D As_rotate = G4RotateY3D(-0.5*M_PI);
-  G4Transform3D As_transform = As_translate*As_rotate;
-  //ConstructAsContainer(logicWorld, As_transform);
-//TODO
-  // store source logical volume
-  //fSourceVolume = logicSample;
-
 
   //
   // HPGe
   //
-  //G4Transform3D TU4_translate = G4Translate3D(0.0,0.0,-17.9*mm);
-  //G4Transform3D TU4_rotate = G4Rotate3D();
-  //G4Transform3D TU4_transform = TU4_translate*TU4_rotate;
-  //ConstructTU4Detector(logicWorld, TU4_transform);
-
-  G4Transform3D TU2_translate = G4Translate3D(0.0,0.0,39.0*mm);
-  G4Transform3D TU2_rotate = G4Rotate3D();
-  G4Transform3D TU2_transform = TU2_translate*TU2_rotate;
-  ConstructTU2Detector(logicWorld, TU2_transform);
+  if (fDoConstruct[0]) 
+    ConstructTU2Detector(logicWorld, fTransformPart[0]);
+  if (fDoConstruct[1])
+    ConstructTU4Detector(logicWorld, fTransformPart[1]);
 
   //
   // SDD
   //
-  //G4Transform3D SDD_translate = G4Translate3D(3.0*mm,0.0,0.0);
-  //G4Transform3D SDD_rotate = G4RotateY3D(-0.5*M_PI);
-  G4Transform3D SDD_translate = G4Translate3D(0.0, 0.0, 39.0*mm);
-  G4Transform3D SDD_rotate = G4RotateY3D(M_PI);
-  G4Transform3D SDD_transform = SDD_translate*SDD_rotate;
-  ConstructTU5Detector(logicWorld, SDD_transform);
+  if (fDoConstruct[2])
+    ConstructTU5Detector(logicWorld, fTransformPart[2]);
+
+  //
+  // radioactive sample
+  //
+  if (fDoConstruct[3])
+    ConstructAsContainer(logicWorld, fTransformPart[3]);
+//TODO
+  // store source logical volume
+  //fSourceVolume = logicSample;
 
   //
   //always return the physical World

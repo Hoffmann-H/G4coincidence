@@ -1,6 +1,12 @@
 /control/verbose 2
 /run/verbose 0
 #
+/geometry/setup/TU4 X 0 0 0 -17.9
+/geometry/setup/TU5 Y -90 3.0 0 0
+/geometry/setup/sample Y -90 0 0 0
+#/geometry/setup/TU2 X 0 0 0 39
+#/geometry/setup/TU5 X 180 0 0 39
+#
 #/primary/ion 11 22
 #/primary/ion 55 137
 #/primary/ion 27 57
@@ -13,8 +19,8 @@
 #/histo/file results/Cs-137.root
 #/histo/file results/Co-57.root
 #/histo/file results/Ba-133.root
-/histo/file results/TU2_39mm_beta_1E7.root
+/histo/file results/check_TU2_1E6.root
 #
 /run/printProgress 100000
 #
-/run/beamOn 10000000
+/run/beamOn 1000000

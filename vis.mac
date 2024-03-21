@@ -4,8 +4,16 @@
 # Sets some default verbose
 # and initializes the graphic.
 #
-/control/verbose 0
+/control/verbose 2
 /run/verbose 2
+#
+# Source inside borehole detector, SDD above
+#/geometry/setup/TU2 X 0 0 0 39
+#/geometry/setup/TU5 X 180 0 0 39
+# TU4+TU5 test setup
+#/geometry/setup/TU4 X 0 0 0 -17.9
+#/geometry/setup/TU5 Y -90 3.0 0 0
+#/geometry/setup/sample Y -90 0 0 0
 #
 /run/initialize
 #

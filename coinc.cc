@@ -83,9 +83,6 @@ int main(int argc,char** argv) {
   // build primary generator action, run action and event action in ActionInitialization
   runManager->SetUserInitialization(new ActionInitialization(histo));
 
-  //initialize G4 kernel
-  runManager->Initialize();
-
   //initialize visualization
   G4VisManager* visManager = nullptr;
 
@@ -101,10 +98,13 @@ int main(int argc,char** argv) {
    delete ui;
   }
   else  {
-   //batch mode
-   G4String command = "/control/execute ";
-   G4String fileName = argv[1];
-   UImanager->ApplyCommand(command+fileName);
+    //initialize G4 kernel
+    runManager->Initialize();
+
+    //batch mode
+    G4String command = "/control/execute ";
+    G4String fileName = argv[1];
+    UImanager->ApplyCommand(command+fileName);
   }
 
   //job termination
