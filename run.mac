@@ -1,11 +1,17 @@
 /control/verbose 2
 /run/verbose 0
 #
-/geometry/setup/TU4 X 0 0 0 -17.9
-/geometry/setup/TU5 Y -90 3.0 0 0
-/geometry/setup/sample Y -90 0 0 0
+# TU4+TU5 test setup
+#/geometry/setup/TU4 X 0 0 0 -17.9
+#/geometry/setup/TU5 Y -90 3.0 0 0
+#/geometry/setup/sample Y -90 0 0 0
+# Source inside borehole detector, SDD above
 #/geometry/setup/TU2 X 0 0 0 39
 #/geometry/setup/TU5 X 180 0 0 39
+# Scintillator anti-coincidence setup
+/geometry/setup/TU5 off
+/geometry/setup/scint X 0 0 0 0
+/geometry/setup/TU4 X 0 0 0 -11
 #
 #/primary/ion 11 22
 #/primary/ion 55 137
@@ -14,13 +20,10 @@
 #/primary/ion 33 73
 /primary/ion 33 76
 /primary/ECbranching 0.0
-#/primary/daughterExcitEnergy 0.0 keV
+#/primary/daughterExcitEnergy 562.93 keV
 #
-#/histo/file results/Cs-137.root
-#/histo/file results/Co-57.root
-#/histo/file results/Ba-133.root
-/histo/file results/check_TU2_1E6.root
+/histo/file results/TU4ScintBeta1E5.root
 #
 /run/printProgress 100000
 #
-/run/beamOn 1000000
+/run/beamOn 100000

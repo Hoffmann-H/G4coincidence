@@ -62,8 +62,10 @@ class HistoManager
   private:
     HistoMessenger *histoMessenger;
     G4String fResFilename;
+    G4bool fDoWriteHisto;
+    G4bool fDoWriteTree;
     G4double HPGeEdep;
-    G4double SDDEdep;
+    G4double Det1Edep;
     TH1F* pH1Edep;
     TTree* pEvtTree;
 };

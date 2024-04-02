@@ -61,6 +61,7 @@ DetectorConstruction::DetectorConstruction()
   fDoConstruct[1] = true;
   fDoConstruct[2] = true;
   fDoConstruct[3] = false;
+  fDoConstruct[4] = false;
   G4Transform3D TU4_translate = G4Translate3D(0.0,0.0,-17.9*mm);
   G4Transform3D TU4_rotate = G4Rotate3D();
   fTransformPart[1] = TU4_translate*TU4_rotate;
@@ -78,8 +79,6 @@ DetectorConstruction::~DetectorConstruction()
 
 void DetectorConstruction::SetConstructPart(G4int part_index, G4String axis, G4double rot, G4double x, G4double y, G4double z)
 {
-    if (part_index == 0) fDoConstruct[1] = false; // construct only 1 HPGe
-    if (part_index == 1) fDoConstruct[0] = false;
     fDoConstruct[part_index] = true;
     G4Transform3D rotate = G4Rotate3D();
     if (axis == "X") rotate = G4RotateX3D(rot/180.*M_PI);
@@ -87,6 +86,13 @@ void DetectorConstruction::SetConstructPart(G4int part_index, G4String axis, G4d
     if (axis == "Z") rotate = G4RotateZ3D(rot/180.*M_PI);
     G4Transform3D translate = G4Translate3D(x*mm, y*mm, z*mm);
     fTransformPart[part_index] = translate*rotate;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::SetRemovePart(G4int part_index)
+{
+    fDoConstruct[part_index] = false;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -109,6 +115,12 @@ void DetectorConstruction::BuildMaterials()
   mat["As2O3"] = new G4Material("As2O3", 3.74*g/cm3, 2, kStateSolid);
   mat["As2O3"]->AddElement(As, 2);
   mat["As2O3"]->AddElement(O, 3);
+  G4Element* C = nist->FindOrBuildElement(6);
+  G4Element* H = nist->FindOrBuildElement(1);
+  mat["PEN"] = new G4Material("PEN", 1.36*g/cm3, 3, kStateSolid);
+  mat["PEN"]->AddElement(C, 14);
+  mat["PEN"]->AddElement(H, 10);
+  mat["PEN"]->AddElement(O, 4);
 
   //G4Ele
   //TODO: peltier, tantalum collimator
@@ -297,6 +309,31 @@ void DetectorConstruction::ConstructTU2Detector(G4LogicalVolume* mother_logical,
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+void DetectorConstruction::ConstructScintillator(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+// Construct the scintillator detector. 
+// It is proposed as a cylinder with a cylindical hole for the As sample or a PTB source. 
+// Outer z=2cm, r=2.54cm, inner z>3mm, r>15mm
+{
+  G4double outer_z = 20*mm;
+  G4double outer_r = 25.4*mm;
+  G4double inner_z = 4*mm;
+  G4double inner_r = 16*mm;
+
+  const int scint_num_planes = 6;
+  const G4double scint_z_plane[] = {outer_z/2, inner_z/2, inner_z/2, -inner_z/2, -inner_z/2, -outer_z/2};
+  const G4double scint_inner_r[] = {0, 0, inner_r, inner_r, 0, 0};
+  const G4double scint_outer_r[] = {outer_r, outer_r, outer_r, outer_r, outer_r, outer_r};
+
+  G4Polycone* solidScint = new G4Polycone("solidScint", 0.0, 2*M_PI,
+    scint_num_planes, scint_z_plane, scint_inner_r, scint_outer_r);
+  G4LogicalVolume* logicScint = new G4LogicalVolume(
+    solidScint, mat["PEN"], "logicScint");
+  G4VPhysicalVolume* physiScint = new G4PVPlacement(
+    global_transform, logicScint, "physiScint", mother_logical, false, 0);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 void DetectorConstruction::ConstructAsContainer(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
 // Construct the polycarbonate sample holder including As.
 // Central point equals the central point of the As layer.
@@ -376,10 +413,16 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     ConstructTU5Detector(logicWorld, fTransformPart[2]);
 
   //
-  // radioactive sample
+  // Scintillator
   //
   if (fDoConstruct[3])
-    ConstructAsContainer(logicWorld, fTransformPart[3]);
+    ConstructScintillator(logicWorld, fTransformPart[3]);
+
+  //
+  // radioactive sample
+  //
+  if (fDoConstruct[4])
+    ConstructAsContainer(logicWorld, fTransformPart[4]);
 //TODO
   // store source logical volume
   //fSourceVolume = logicSample;
@@ -400,9 +443,15 @@ void DetectorConstruction::ConstructSDandField()
   G4SDManager::GetSDMpointer()->AddNewDetector(aHPGeSD);
   SetSensitiveDetector("logicHPGe", aHPGeSD, true);
 
-  HPGeSD* aSDDSD = new HPGeSD("SDDSD", "SDDHitsCollection");
-  G4SDManager::GetSDMpointer()->AddNewDetector(aSDDSD);
-  SetSensitiveDetector("logicSDD", aSDDSD, true);
+  if (fDoConstruct[2]) {
+    HPGeSD* aSDDSD = new HPGeSD("SDDSD", "Det1HitsCollection");
+    G4SDManager::GetSDMpointer()->AddNewDetector(aSDDSD);
+    SetSensitiveDetector("logicSDD", aSDDSD, true);
+  } else if (fDoConstruct[3]) {
+    HPGeSD* aScintSD = new HPGeSD("ScintSD", "Det1HitsCollection");
+    G4SDManager::GetSDMpointer()->AddNewDetector(aScintSD);
+    SetSensitiveDetector("logicScint", aScintSD, true);
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

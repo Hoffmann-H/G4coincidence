@@ -85,13 +85,13 @@ void EventAction::EndOfEventAction(const G4Event* evt)
     //get through all hits of this event
     G4int nofHPGeHits = HPGe_HC->entries();
 
-    HCName = "SDDHitsCollection";
-    HPGeHitsCollection *SDD_HC;
-    fSDD_HCID = G4SDManager::GetSDMpointer()->GetCollectionID(HCName);
-    SDD_HC = GetHitsCollection(fSDD_HCID, evt);
-    G4int nofSDDHits = SDD_HC->entries();
+    HCName = "Det1HitsCollection";
+    HPGeHitsCollection *Det1_HC;
+    fDet1_HCID = G4SDManager::GetSDMpointer()->GetCollectionID(HCName);
+    Det1_HC = GetHitsCollection(fDet1_HCID, evt);
+    G4int nofDet1Hits = Det1_HC->entries();
 
-    if (nofSDDHits == 0 && nofHPGeHits == 0)
+    if (nofDet1Hits == 0 && nofHPGeHits == 0)
       return;
     
     //G4cout << "* DEBUG: event " << evt->GetEventID() << ", HC " << HPGe_HC->GetName() << ": " << nofHits << " hits" << G4endl;
@@ -102,20 +102,20 @@ void EventAction::EndOfEventAction(const G4Event* evt)
         HPGeEdep += hit->GetEdep();
         //G4cout << "total Edep: " << totEdep << G4endl;
     }
-    G4double SDDEdep = 0.0 * CLHEP::keV;
-    for (G4int i = 0; i < nofSDDHits; i++) {
-        HPGeHit *hit = (*SDD_HC)[i];
+    G4double Det1Edep = 0.0 * CLHEP::keV;
+    for (G4int i = 0; i < nofDet1Hits; i++) {
+        HPGeHit *hit = (*Det1_HC)[i];
         //hit->Print();
-        SDDEdep += hit->GetEdep();
+        Det1Edep += hit->GetEdep();
         //G4cout << "total Edep: " << totEdep << G4endl;
     }
-    //G4cout << "SDD hit " << G4BestUnit(SDDEdep, "Energy") << G4endl;
+    //G4cout << "Det1 hit " << G4BestUnit(Det1Edep, "Energy") << G4endl;
     //G4cout << "HPGe hit " << G4BestUnit(HPGeEdep, "Energy") << G4endl;
 
     // Fill Histogram
     //G4cout << "Fill " << G4BestUnit(totEdep, "Energy") << G4endl;
     histoManager->SetEdep(0, HPGeEdep/CLHEP::keV);
-    histoManager->SetEdep(1, SDDEdep/CLHEP::keV);
+    histoManager->SetEdep(1, Det1Edep/CLHEP::keV);
     histoManager->Fill();
 //    G4AnalysisManager::Instance()->FillH1(1, totEdep);
 

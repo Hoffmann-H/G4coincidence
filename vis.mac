@@ -14,6 +14,14 @@
 #/geometry/setup/TU4 X 0 0 0 -17.9
 #/geometry/setup/TU5 Y -90 3.0 0 0
 #/geometry/setup/sample Y -90 0 0 0
+# Scintillator anti-coincidence setup
+/geometry/setup/TU5 off
+/geometry/setup/scint X 0 0 0 0
+/geometry/setup/TU4 X 0 0 0 -11
+#
+/primary/ion 33 76
+/primary/ECbranching 0.0
+#/primary/daughterExcitEnergy 562.93 keV
 #
 /run/initialize
 #
@@ -86,4 +94,4 @@
 # show spatial axes
 #/vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
 #
-#/vis/viewer/addCutawayPlane 0 0 0 cm 0 1 0
+/vis/viewer/addCutawayPlane 0 0 0 cm 0 1 0

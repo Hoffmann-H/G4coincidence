@@ -39,8 +39,10 @@
 HistoManager::HistoManager()
 {
   fResFilename = "results/out.root";
+  fDoWriteHisto = false;
+  fDoWriteTree = true;
   HPGeEdep = 0;
-  SDDEdep = 0;
+  Det1Edep = 0;
   histoMessenger = new HistoMessenger(this);
 }
 
@@ -60,37 +62,10 @@ void HistoManager::Book()
   G4String hist_name = "H1Edep";
   G4String hist_title = "Energy deposition; E / keV; N";
   pH1Edep = new TH1F(hist_name.c_str(), hist_title.c_str(), 100, 0, 100);
-  // Create or get analysis manager
-  // The choice of analysis technology is done via selection of a namespace
-  // in HistoManager.hh
-/*  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
-  analysisManager->SetFileName(fFileName);
-  analysisManager->SetVerboseLevel(1);
-  analysisManager->SetActivation(true);     //enable inactivation of histograms
-  
-  // Define histograms start values
-  const G4int kMaxHisto = 2;
-  const G4String id[] = {"0", "1"};
-  const G4String title[] = 
-          { "dummy",                                    //0
-            "gamma energy spectrum",                    //1
-          };
-
-  // Default values (to be reset via /analysis/h1/set command)               
-  G4int nbins = 100;
-  G4double vmin = 0.;
-  G4double vmax = 100.;
-
-  // Create all histograms as inactivated 
-  // as we have not yet set nbins, vmin, vmax
-  for (G4int k=0; k<kMaxHisto; k++) {
-    G4int ih = analysisManager->CreateH1(id[k], title[k], nbins, vmin, vmax);
-    analysisManager->SetH1Activation(ih, false);
-  }*/
 
   pEvtTree = new TTree("tEvt", "event tree");
-  pEvtTree->Branch("ge", &HPGeEdep);
-  pEvtTree->Branch("sdd", &SDDEdep);
+  pEvtTree->Branch("det0", &HPGeEdep);
+  pEvtTree->Branch("det1", &Det1Edep);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -101,7 +76,7 @@ void HistoManager::SetEdep(G4int det, G4double edep)
   if (det == 0)
     HPGeEdep = edep;
   else if (det == 1)
-    SDDEdep = edep;
+    Det1Edep = edep;
   else G4cout << "Unknown detector id: " << det << G4endl;
 }
 
@@ -109,8 +84,8 @@ void HistoManager::SetEdep(G4int det, G4double edep)
 
 void HistoManager::Fill()
 {
-  pH1Edep->Fill(HPGeEdep);///CLHEP::keV);
-  pEvtTree->Fill();
+  if (fDoWriteHisto) pH1Edep->Fill(HPGeEdep);///CLHEP::keV);
+  if (fDoWriteTree) pEvtTree->Fill();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -118,8 +93,8 @@ void HistoManager::Fill()
 void HistoManager::SaveFile()
 {
   TFile* f = TFile::Open(fResFilename.c_str(), "UPDATE");
-  pH1Edep->Write("", TObject::kOverwrite);
-  pEvtTree->Write("", TObject::kOverwrite);
+  if (fDoWriteHisto) pH1Edep->Write("", TObject::kOverwrite);
+  if (fDoWriteTree) pEvtTree->Write("", TObject::kOverwrite);
   f->Save();
   f->Close();
   G4cout << "Save file" << G4endl;
