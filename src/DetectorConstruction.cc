@@ -57,11 +57,12 @@ DetectorConstruction::DetectorConstruction()
   fDetectorMessenger = new DetectorMessenger(this);
 
   // standard setup
-  fDoConstruct[0] = false;
-  fDoConstruct[1] = true;
-  fDoConstruct[2] = true;
-  fDoConstruct[3] = false;
-  fDoConstruct[4] = false;
+  fDoConstruct[0] = false;  // TU2
+  fDoConstruct[1] = true;   // TU4
+  fDoConstruct[2] = true;   // TU5
+  fDoConstruct[3] = false;  // scintillator
+  fDoConstruct[4] = false;  // sample #1
+  fDoConstruct[5] = false;  // sample #2
   G4Transform3D TU4_translate = G4Translate3D(0.0,0.0,-17.9*mm);
   G4Transform3D TU4_rotate = G4Rotate3D();
   fTransformPart[1] = TU4_translate*TU4_rotate;
@@ -117,10 +118,9 @@ void DetectorConstruction::BuildMaterials()
   mat["As2O3"]->AddElement(O, 3);
   G4Element* C = nist->FindOrBuildElement(6);
   G4Element* H = nist->FindOrBuildElement(1);
-  mat["PEN"] = new G4Material("PEN", 1.36*g/cm3, 3, kStateSolid);
-  mat["PEN"]->AddElement(C, 14);
-  mat["PEN"]->AddElement(H, 10);
-  mat["PEN"]->AddElement(O, 4);
+  mat["EJ260"] = new G4Material("EJ260", 1.023*g/cm3, 2, kStateSolid);
+  mat["EJ260"]->AddElement(C, 9);
+  mat["EJ260"]->AddElement(H, 11);
 
   //G4Ele
   //TODO: peltier, tantalum collimator
@@ -311,13 +311,13 @@ void DetectorConstruction::ConstructTU2Detector(G4LogicalVolume* mother_logical,
 
 void DetectorConstruction::ConstructScintillator(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
 // Construct the scintillator detector. 
-// It is proposed as a cylinder with a cylindical hole for the As sample or a PTB source. 
-// Outer z=2cm, r=2.54cm, inner z>3mm, r>15mm
+// It is a cylinder with a cylindical hole for the As sample or a PTB source. 
+// Outer z=2cm, r=2.54cm, inner z=6.5mm, r=15.25mm
 {
   G4double outer_z = 20*mm;
   G4double outer_r = 25.4*mm;
-  G4double inner_z = 4*mm;
-  G4double inner_r = 16*mm;
+  G4double inner_z = 6.5*mm;
+  G4double inner_r = 15.25*mm;
 
   const int scint_num_planes = 6;
   const G4double scint_z_plane[] = {outer_z/2, inner_z/2, inner_z/2, -inner_z/2, -inner_z/2, -outer_z/2};
@@ -327,14 +327,14 @@ void DetectorConstruction::ConstructScintillator(G4LogicalVolume* mother_logical
   G4Polycone* solidScint = new G4Polycone("solidScint", 0.0, 2*M_PI,
     scint_num_planes, scint_z_plane, scint_inner_r, scint_outer_r);
   G4LogicalVolume* logicScint = new G4LogicalVolume(
-    solidScint, mat["PEN"], "logicScint");
+    solidScint, mat["EJ260"], "logicScint");
   G4VPhysicalVolume* physiScint = new G4PVPlacement(
     global_transform, logicScint, "physiScint", mother_logical, false, 0);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::ConstructAsContainer(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+void DetectorConstruction::ConstructAsContainer1(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
 // Construct the polycarbonate sample holder including As.
 // Central point equals the central point of the As layer.
 {
@@ -342,6 +342,43 @@ void DetectorConstruction::ConstructAsContainer(G4LogicalVolume* mother_logical,
   G4double As_radius = 11.0*mm;
   G4double cont_window_thickness = 1.0*mm;
   G4double cont_total_z = 8.0*mm;
+  G4double cont_total_r = 12.0*mm;
+  G4double ring_inner_r = 9.0*mm;
+  G4double bottom = -cont_window_thickness - 0.5*As_thickness; // z coordinate
+
+  // construct the container
+  const int cont_num_planes = 4;
+  const G4double cont_z_plane[] = {bottom+cont_total_z, -bottom, -bottom, bottom};
+  const G4double cont_inner_r[] = {ring_inner_r, ring_inner_r, 0.0, 0.0};
+  const G4double cont_outer_r[] = {cont_total_r, cont_total_r, cont_total_r, cont_total_r};
+  G4Polycone* solidCont = new G4Polycone("solidCont", 0.0, 2*M_PI,
+    cont_num_planes, cont_z_plane, cont_inner_r, cont_outer_r);
+  G4LogicalVolume* logicCont = new G4LogicalVolume(
+    solidCont, mat["polycarbonate"], "logicCont");
+  G4VPhysicalVolume* physiCont = new G4PVPlacement(
+    global_transform, logicCont, "physiCont", mother_logical, false, 0);
+
+  // Place the As layer into the container
+  G4Tubs* solidSample = new G4Tubs("solidSample",
+    0, As_radius, As_thickness/2, 0, 2*M_PI);
+  G4LogicalVolume* logicSample = new G4LogicalVolume(
+    solidSample, mat["As2O3"], "logicSample");
+  logicSample->SetVisAttributes(new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)));
+  G4VPhysicalVolume* physiSample = new G4PVPlacement(
+    G4Transform3D(), logicSample, "physiSample", logicCont, false, 0);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+
+void DetectorConstruction::ConstructAsContainer2(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+// Construct the polycarbonate sample holder including As.
+// Central point equals the central point of the As layer.
+{
+  G4double As_thickness = 0.137*mm; // 195 mg of 3.74 g/cm3 in a cylinder of r=1.1cm
+  G4double As_radius = 11.0*mm;
+  G4double cont_window_thickness = 0.5*mm;
+  G4double cont_total_z = 5.5*mm;
   G4double cont_total_r = 12.0*mm;
   G4double ring_inner_r = 9.0*mm;
   G4double bottom = -cont_window_thickness - 0.5*As_thickness; // z coordinate
@@ -422,7 +459,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // radioactive sample
   //
   if (fDoConstruct[4])
-    ConstructAsContainer(logicWorld, fTransformPart[4]);
+    ConstructAsContainer1(logicWorld, fTransformPart[4]);
+  if (fDoConstruct[5])
+    ConstructAsContainer2(logicWorld, fTransformPart[5]);
 //TODO
   // store source logical volume
   //fSourceVolume = logicSample;

@@ -66,10 +66,11 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void ConstructTU4Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructTU5Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructScintillator(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
-    void ConstructAsContainer(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
+    void ConstructAsContainer1(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
+    void ConstructAsContainer2(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
 
-    G4bool fDoConstruct[5]; // TU2, TU4, TU5, scint, sample
-    G4Transform3D fTransformPart[5];
+    G4bool fDoConstruct[6]; // TU2, TU4, TU5, scint, sample1, sample2
+    G4Transform3D fTransformPart[6];
   
     G4bool checkOverlaps;
     G4double fWorldSize;

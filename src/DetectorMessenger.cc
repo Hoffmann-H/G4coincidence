@@ -66,9 +66,13 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fScintCmd->SetGuidance("specify construction of scintillator detector. Parameters: (X|Y|Z) Rotation/degrees translation(X Y Z)/mm");
   fScintCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  fSampleCmd = new G4UIcmdWithAString("/geometry/setup/sample",this);
-  fSampleCmd->SetGuidance("specify construction of As sample container. Parameters: (X|Y|Z) Rotation/degrees translation(X Y Z)/mm");
-  fSampleCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+  fSample1Cmd = new G4UIcmdWithAString("/geometry/setup/sample1",this);
+  fSample1Cmd->SetGuidance("specify construction of As sample container #1. Parameters: (X|Y|Z) Rotation/degrees translation(X Y Z)/mm");
+  fSample1Cmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  fSample2Cmd = new G4UIcmdWithAString("/geometry/setup/sample2",this);
+  fSample2Cmd->SetGuidance("specify construction of As sample container #2. Parameters: (X|Y|Z) Rotation/degrees translation(X Y Z)/mm");
+  fSample2Cmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -80,7 +84,8 @@ DetectorMessenger::~DetectorMessenger()
   delete fTU4Cmd;
   delete fTU5Cmd;
   delete fScintCmd;
-  delete fSampleCmd;
+  delete fSample1Cmd;
+  delete fSample2Cmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -89,7 +94,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 { // Given arguments will be found in the newValue string, otherwise it is empty.
   if (command == fTU2Cmd || command == fTU4Cmd
    || command == fTU5Cmd || command == fScintCmd
-   || command == fSampleCmd)
+   || command == fSample1Cmd || command == fSample2Cmd)
   {
       // Find index of the part to be edited/removed
       G4int part_index = 0;
@@ -101,8 +106,10 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
         part_index = 2;
       if (command == fScintCmd)
         part_index = 3;
-      if (command == fSampleCmd)
+      if (command == fSample1Cmd)
         part_index = 4;
+      if (command == fSample2Cmd)
+        part_index = 5;
       // With a simple argument "off", remove it
       if (newValue == "off") {
         fDetectorConstruction->SetRemovePart(part_index);

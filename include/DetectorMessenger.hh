@@ -61,7 +61,8 @@ class DetectorMessenger: public G4UImessenger
     G4UIcmdWithAString*        fTU4Cmd;
     G4UIcmdWithAString*        fTU5Cmd;
     G4UIcmdWithAString*        fScintCmd;
-    G4UIcmdWithAString*        fSampleCmd;
+    G4UIcmdWithAString*        fSample1Cmd;
+    G4UIcmdWithAString*        fSample2Cmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
