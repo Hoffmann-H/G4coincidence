@@ -40,7 +40,7 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-EventAction::EventAction(HistoManager* histo)
+EventAction::EventAction(HistoManager* histo, DetectorConstruction* det)
     : G4UserEventAction(), 
     glPrintModulo(100000)
 {
@@ -77,7 +77,7 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
 
 void EventAction::EndOfEventAction(const G4Event* evt)
 {
-    G4String HCName = "HPGeHitsCollection";
+    G4String HCName = "TU4HitsCollection";
     HPGeHitsCollection *HPGe_HC;
     fHPGe_HCID = G4SDManager::GetSDMpointer()->GetCollectionID(HCName);
     // Get hits collection
@@ -85,7 +85,7 @@ void EventAction::EndOfEventAction(const G4Event* evt)
     //get through all hits of this event
     G4int nofHPGeHits = HPGe_HC->entries();
 
-    HCName = "Det1HitsCollection";
+    HCName = "ScintHitsCollection";
     HPGeHitsCollection *Det1_HC;
     fDet1_HCID = G4SDManager::GetSDMpointer()->GetCollectionID(HCName);
     Det1_HC = GetHitsCollection(fDet1_HCID, evt);

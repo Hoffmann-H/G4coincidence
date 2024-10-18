@@ -73,7 +73,8 @@ int main(int argc,char** argv) {
 
   //set mandatory initialization classes
   //
-  runManager->SetUserInitialization(new DetectorConstruction);
+  DetectorConstruction* det = new DetectorConstruction;
+  runManager->SetUserInitialization(det);
   runManager->SetUserInitialization(new PhysicsList);
   //runManager->SetUserInitialization(new QGSP_BIC);
   //runManager->SetUserInitialization(new FTFP_BERT);
@@ -81,7 +82,7 @@ int main(int argc,char** argv) {
   // HistoManager will be passed to action classes via ActionInitalization()
   HistoManager* histo = new HistoManager();
   // build primary generator action, run action and event action in ActionInitialization
-  runManager->SetUserInitialization(new ActionInitialization(histo));
+  runManager->SetUserInitialization(new ActionInitialization(histo, det));
 
   //initialize visualization
   G4VisManager* visManager = nullptr;

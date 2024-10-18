@@ -128,6 +128,15 @@ void DetectorConstruction::BuildMaterials()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+void DetectorConstruction::AddDetectorName(G4String name)
+// Add a detector name to the list of detecor names. This is called during the derector construction. 
+// Calling this for every detector will store the number of sensitive volumes and their names in the vecDetectorNames vector.
+{
+  vecDetectorNames.push_back(name);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 void DetectorConstruction::ConstructTU5Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
 // Construct the SDD X-ray detector,
 // with frontent point at given frontend_position and given rotation.
@@ -155,10 +164,16 @@ void DetectorConstruction::ConstructTU5Detector(G4LogicalVolume* mother_logical,
   G4Transform3D window_internal_translate = G4Translate3D(0.0, 0.0, -sens_depth+0.5*window_dz);
   G4Transform3D window_total_transform = global_transform*window_internal_translate*window_internal_rotate;
 
+
+  // unique detector name
+  G4String detectorName = "TU5";
+  // construct sensitive part
   G4Tubs* sens_solid = new G4Tubs("solidSDD", sens_rmin, sens_rmax, 0.5*sens_dz, sens_sphi, sens_dphi);
   G4LogicalVolume *sens_logical = new G4LogicalVolume(sens_solid, mat["Si"], "logicSDD");
   sens_logical->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
   new G4PVPlacement(sens_total_transform, sens_logical, "physiSDD", mother_logical, false, 0, checkOverlaps);
+  // register the sensitive logic volume name for sensitive detector
+  AddDetectorName(detectorName);
 
   G4Tubs* window_solid = new G4Tubs("solidBeWindow", window_rmin, window_rmax, 0.5*window_dz, window_sphi, window_dphi);
   G4LogicalVolume *window_logical = new G4LogicalVolume(window_solid, mat["Be"], "logicBeWindow");
@@ -194,13 +209,18 @@ void DetectorConstruction::ConstructTU4Detector(G4LogicalVolume* mother_logical,
   G4double sens_rmax = 0.5*HPGe_crystal_diameter - HPGe_dead_layer;
   G4double sens_dz = HPGe_crystal_length - 2.0*HPGe_dead_layer;
 
+  // unique detector name
+  G4String detectorName = "TU4";
+  // construct sensitive part
   G4Tubs* solidSens = new G4Tubs("solidHPGe",
     sens_rmin, sens_rmax, sens_dz/2, 0, 2*M_PI);
   G4LogicalVolume* logicSens = new G4LogicalVolume(
-    solidSens, mat["Ge"], "logicHPGe");
+    solidSens, mat["Ge"], "logic"+detectorName);
   logicSens->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
   G4VPhysicalVolume* physiSens = new G4PVPlacement(
     0, G4ThreeVector(), logicSens, "physiHPGe", logicCrystal, false, 0);
+  // register the sensitive logic volume name for sensitive detector
+  AddDetectorName(detectorName);
 
   // end cap
   const int cap_num_planes = 4;
@@ -240,7 +260,9 @@ void DetectorConstruction::ConstructTU2Detector(G4LogicalVolume* mother_logical,
   G4double HPGe_cap_thickness = 2.0*mm; // guessed
   G4double HPGe_dead_layer = 0.3*mm; // guessed
 
-  // crystal
+  // unique detector name
+  G4String detectorName = "TU2";
+  // crystal properties
   const int crystal_num_planes = 4;
   const G4double crystal_z_plane[crystal_num_planes] = {0.0,
     -HPGe_crystal_well_depth,
@@ -258,13 +280,16 @@ void DetectorConstruction::ConstructTU2Detector(G4LogicalVolume* mother_logical,
   G4Transform3D crystal_internal_translate = G4Translate3D(0.0, 0.0,
     - HPGe_cap_thickness - HPGe_cap_to_crystal_front);
   G4Transform3D crystal_total_transform = global_transform*crystal_internal_translate;
+  // construct sensitive part
   G4Polycone* solidCrystal = new G4Polycone("solidCrystal", 0, 2*M_PI,
     crystal_num_planes, crystal_z_plane, crystal_inner_r, crystal_outer_r);
   G4LogicalVolume* logicSens = new G4LogicalVolume(
-    solidCrystal, mat["Ge"], "logicHPGe");
+    solidCrystal, mat["Ge"], "logic"+detectorName);
   logicSens->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
   G4VPhysicalVolume* physiSens = new G4PVPlacement(
     crystal_total_transform, logicSens, "physiHPGe", mother_logical, false, 0);
+  // register the sensitive logic volume name for sensitive detector
+  AddDetectorName(detectorName);
 
   // end cap
   const int cap_num_planes = 6;
@@ -323,13 +348,17 @@ void DetectorConstruction::ConstructScintillator(G4LogicalVolume* mother_logical
   const G4double scint_z_plane[] = {outer_z/2, inner_z/2, inner_z/2, -inner_z/2, -inner_z/2, -outer_z/2};
   const G4double scint_inner_r[] = {0, 0, inner_r, inner_r, 0, 0};
   const G4double scint_outer_r[] = {outer_r, outer_r, outer_r, outer_r, outer_r, outer_r};
-
+  // unique detector name
+  G4String detectorName = "Scint";
+  // construct sensitive part
   G4Polycone* solidScint = new G4Polycone("solidScint", 0.0, 2*M_PI,
     scint_num_planes, scint_z_plane, scint_inner_r, scint_outer_r);
   G4LogicalVolume* logicScint = new G4LogicalVolume(
-    solidScint, mat["EJ260"], "logicScint");
+    solidScint, mat["EJ260"], "logic"+detectorName);
   G4VPhysicalVolume* physiScint = new G4PVPlacement(
     global_transform, logicScint, "physiScint", mother_logical, false, 0);
+  // register the sensitive logic volume name for sensitive detector
+  AddDetectorName(detectorName);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -478,19 +507,12 @@ void DetectorConstruction::ConstructSDandField()
 {
   // Sensitive detectors
 
-  HPGeSD* aHPGeSD = new HPGeSD("HPGeSD", "HPGeHitsCollection");
-  G4SDManager::GetSDMpointer()->AddNewDetector(aHPGeSD);
-  SetSensitiveDetector("logicHPGe", aHPGeSD, true);
-
-  if (fDoConstruct[2]) {
-    HPGeSD* aSDDSD = new HPGeSD("SDDSD", "Det1HitsCollection");
-    G4SDManager::GetSDMpointer()->AddNewDetector(aSDDSD);
-    SetSensitiveDetector("logicSDD", aSDDSD, true);
-  } else if (fDoConstruct[3]) {
-    HPGeSD* aScintSD = new HPGeSD("ScintSD", "Det1HitsCollection");
-    G4SDManager::GetSDMpointer()->AddNewDetector(aScintSD);
-    SetSensitiveDetector("logicScint", aScintSD, true);
+  for (G4String detectorName : vecDetectorNames) {
+    HPGeSD* aHPGeSD = new HPGeSD(detectorName+"SD", detectorName+"HitsCollection");
+    G4SDManager::GetSDMpointer()->AddNewDetector(aHPGeSD);
+    SetSensitiveDetector("logic"+detectorName, aHPGeSD, true);
   }
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

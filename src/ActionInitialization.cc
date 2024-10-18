@@ -29,15 +29,18 @@
 
 #include "ActionInitialization.hh"
 #include "PrimaryGeneratorAction.hh"
+#include "HistoManager.hh"
+#include "DetectorConstruction.hh"
 #include "RunAction.hh"
 #include "EventAction.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-ActionInitialization::ActionInitialization(HistoManager *histo)
+ActionInitialization::ActionInitialization(HistoManager *histo, DetectorConstruction* det)
  : G4VUserActionInitialization()
 {
   histoMan = histo;
+  detCon = det;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -55,7 +58,7 @@ void ActionInitialization::Build() const
   RunAction* runAction = new RunAction(histoMan);
   SetUserAction(runAction);
 
-  EventAction* eventAction = new EventAction(histoMan);
+  EventAction* eventAction = new EventAction(histoMan, detCon);
   SetUserAction(eventAction);
 }  
 

@@ -47,7 +47,7 @@ using namespace CLHEP;
 class EventAction : public G4UserEventAction
 {
 public:
-  EventAction(HistoManager* histo);
+  EventAction(HistoManager* histo, DetectorConstruction* det);
   virtual ~EventAction();
 
   virtual void  BeginOfEventAction(const G4Event* evt);

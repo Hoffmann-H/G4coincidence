@@ -62,6 +62,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
   private:
     DetectorMessenger *fDetectorMessenger;
     void BuildMaterials();
+    void AddDetectorName(G4String name);
     void ConstructTU2Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructTU4Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructTU5Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
@@ -71,6 +72,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     G4bool fDoConstruct[6]; // TU2, TU4, TU5, scint, sample1, sample2
     G4Transform3D fTransformPart[6];
+    std::vector<G4String> vecDetectorNames;
   
     G4bool checkOverlaps;
     G4double fWorldSize;
