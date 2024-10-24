@@ -57,12 +57,7 @@ class DetectorMessenger: public G4UImessenger
     DetectorConstruction*      fDetectorConstruction;
     
     G4UIdirectory*             fSetupDir;
-    G4UIcmdWithAString*        fTU2Cmd;
-    G4UIcmdWithAString*        fTU4Cmd;
-    G4UIcmdWithAString*        fTU5Cmd;
-    G4UIcmdWithAString*        fScintCmd;
-    G4UIcmdWithAString*        fSample1Cmd;
-    G4UIcmdWithAString*        fSample2Cmd;
+    G4UIcmdWithAString*        fPlaceCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

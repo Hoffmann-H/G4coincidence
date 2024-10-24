@@ -55,20 +55,6 @@ DetectorConstruction::DetectorConstruction()
 {
   fWorldSize = 1.0*m;
   fDetectorMessenger = new DetectorMessenger(this);
-
-  // standard setup
-  fDoConstruct[0] = false;  // TU2
-  fDoConstruct[1] = true;   // TU4
-  fDoConstruct[2] = true;   // TU5
-  fDoConstruct[3] = false;  // scintillator
-  fDoConstruct[4] = false;  // sample #1
-  fDoConstruct[5] = false;  // sample #2
-  G4Transform3D TU4_translate = G4Translate3D(0.0,0.0,-17.9*mm);
-  G4Transform3D TU4_rotate = G4Rotate3D();
-  fTransformPart[1] = TU4_translate*TU4_rotate;
-  G4Transform3D TU5_translate = G4Translate3D(3.0*mm,0.0,0.0);
-  G4Transform3D TU5_rotate = G4RotateY3D(-0.5*M_PI);
-  fTransformPart[2] = TU5_translate*TU5_rotate;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -78,22 +64,15 @@ DetectorConstruction::~DetectorConstruction()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::SetConstructPart(G4int part_index, G4String axis, G4double rot, G4double x, G4double y, G4double z)
+void DetectorConstruction::SetConstructPart(G4String name, G4String axis, G4double rot, G4double x, G4double y, G4double z)
 {
-    fDoConstruct[part_index] = true;
+    fConstructPart.push_back(name);
     G4Transform3D rotate = G4Rotate3D();
     if (axis == "X") rotate = G4RotateX3D(rot/180.*M_PI);
     if (axis == "Y") rotate = G4RotateY3D(rot/180.*M_PI);
     if (axis == "Z") rotate = G4RotateZ3D(rot/180.*M_PI);
     G4Transform3D translate = G4Translate3D(x*mm, y*mm, z*mm);
-    fTransformPart[part_index] = translate*rotate;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void DetectorConstruction::SetRemovePart(G4int part_index)
-{
-    fDoConstruct[part_index] = false;
+    fTransformPart.push_back(translate*rotate);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -465,35 +444,18 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                                  0);                     //copy number
 
   //
-  // HPGe
+  // Construct optional parts including detectors and non-detector parts like samples
   //
-  if (fDoConstruct[0]) 
-    ConstructTU2Detector(logicWorld, fTransformPart[0]);
-  if (fDoConstruct[1])
-    ConstructTU4Detector(logicWorld, fTransformPart[1]);
-
-  //
-  // SDD
-  //
-  if (fDoConstruct[2])
-    ConstructTU5Detector(logicWorld, fTransformPart[2]);
-
-  //
-  // Scintillator
-  //
-  if (fDoConstruct[3])
-    ConstructScintillator(logicWorld, fTransformPart[3]);
-
-  //
-  // radioactive sample
-  //
-  if (fDoConstruct[4])
-    ConstructAsContainer1(logicWorld, fTransformPart[4]);
-  if (fDoConstruct[5])
-    ConstructAsContainer2(logicWorld, fTransformPart[5]);
-//TODO
-  // store source logical volume
-  //fSourceVolume = logicSample;
+  for (int i = 0; i < fConstructPart.size(); i++) {
+    G4String name = fConstructPart.at(i);
+    G4Transform3D trans = fTransformPart.at(i);
+    if (name == "TU2") ConstructTU2Detector(logicWorld, trans);
+    if (name == "TU4") ConstructTU4Detector(logicWorld, trans);
+    if (name == "TU5") ConstructTU5Detector(logicWorld, trans);
+    if (name == "Scint") ConstructScintillator(logicWorld, trans);
+    if (name == "sample1") ConstructAsContainer1(logicWorld, trans);
+    if (name == "sample2") ConstructAsContainer2(logicWorld, trans);
+  }
 
   //
   //always return the physical World

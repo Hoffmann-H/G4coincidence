@@ -39,6 +39,7 @@
 #include <map>
 
 class DetectorMessenger;
+//class EventAction;
 class G4VPhysicalVolume;
 class G4LogicalVolume;
 class G4Material;
@@ -56,8 +57,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4VPhysicalVolume* Construct();
     virtual void ConstructSDandField();
 
-    void SetConstructPart(G4int part_index, G4String axis, G4double rot, G4double x, G4double y, G4double z);
-    void SetRemovePart(G4int part_index);
+    void SetConstructPart(G4String name, G4String axis, G4double rot, G4double x, G4double y, G4double z);
     
   private:
     DetectorMessenger *fDetectorMessenger;
@@ -70,9 +70,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void ConstructAsContainer1(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructAsContainer2(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
 
-    G4bool fDoConstruct[6]; // TU2, TU4, TU5, scint, sample1, sample2
-    G4Transform3D fTransformPart[6];
-    std::vector<G4String> vecDetectorNames;
+    std::vector<G4String> fConstructPart; // list of parts to be constructed identified by name
+    std::vector<G4Transform3D> fTransformPart; // corresponding global position information. Must have same size as fConstructPart.
+    std::vector<G4String> vecDetectorNames; // list of detector names for sensitive detector, EventAction and HistoManager.
   
     G4bool checkOverlaps;
     G4double fWorldSize;
