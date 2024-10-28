@@ -78,51 +78,34 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
 
 void EventAction::EndOfEventAction(const G4Event* evt)
 {
-    for (G4String name : detectorConstruction->vecDetectorNames)
+    G4bool noHits = true;
+    for (int iDet = 0; iDet < detectorConstruction->vecDetectorNames.size(); iDet++)
+    {
+      G4String name = detectorConstruction->vecDetectorNames.at(iDet);
       G4cout << "EndOfEventAction knows detector " << name << G4endl;
 
-    G4String HCName = "TU4HitsCollection";
-    HPGeHitsCollection *HPGe_HC;
-    fHPGe_HCID = G4SDManager::GetSDMpointer()->GetCollectionID(HCName);
-    // Get hits collection
-    HPGe_HC = GetHitsCollection(fHPGe_HCID, evt);
-    //get through all hits of this event
-    G4int nofHPGeHits = HPGe_HC->entries();
+      G4String HCName = name + "HitsCollection";
+      HPGeHitsCollection *HPGe_HC;
+      G4int fHPGe_HCID = G4SDManager::GetSDMpointer()->GetCollectionID(HCName);
+      // Get hits collection
+      HPGe_HC = GetHitsCollection(fHPGe_HCID, evt);
 
-    HCName = "ScintHitsCollection";
-    HPGeHitsCollection *Det1_HC;
-    fDet1_HCID = G4SDManager::GetSDMpointer()->GetCollectionID(HCName);
-    Det1_HC = GetHitsCollection(fDet1_HCID, evt);
-    G4int nofDet1Hits = Det1_HC->entries();
-
-    if (nofDet1Hits == 0 && nofHPGeHits == 0)
-      return;
-    
-    //G4cout << "* DEBUG: event " << evt->GetEventID() << ", HC " << HPGe_HC->GetName() << ": " << nofHits << " hits" << G4endl;
-    G4double HPGeEdep = 0.0 * CLHEP::keV;
-    for (G4int i = 0; i < nofHPGeHits; i++) {
+      //get through all hits of this event
+      G4int nofHits = HPGe_HC->entries();
+      if (nofHits > 0) noHits = false;
+      //G4cout << "* DEBUG: event " << evt->GetEventID() << ", HC " << HPGe_HC->GetName() << ": " << nofHits << " hits" << G4endl;
+      G4double HPGeEdep = 0.0 * CLHEP::keV;
+      for (G4int i = 0; i < nofHits; i++) {
         HPGeHit *hit = (*HPGe_HC)[i];
         //hit->Print();
         HPGeEdep += hit->GetEdep();
-        //G4cout << "total Edep: " << totEdep << G4endl;
+      }
+      histoManager->SetEdep(iDet, HPGeEdep/CLHEP::keV);
     }
-    G4double Det1Edep = 0.0 * CLHEP::keV;
-    for (G4int i = 0; i < nofDet1Hits; i++) {
-        HPGeHit *hit = (*Det1_HC)[i];
-        //hit->Print();
-        Det1Edep += hit->GetEdep();
-        //G4cout << "total Edep: " << totEdep << G4endl;
-    }
-    //G4cout << "Det1 hit " << G4BestUnit(Det1Edep, "Energy") << G4endl;
-    //G4cout << "HPGe hit " << G4BestUnit(HPGeEdep, "Energy") << G4endl;
-
+    if (noHits)
+      return;
     // Fill Histogram
-    //G4cout << "Fill " << G4BestUnit(totEdep, "Energy") << G4endl;
-    histoManager->SetEdep(0, HPGeEdep/CLHEP::keV);
-    histoManager->SetEdep(1, Det1Edep/CLHEP::keV);
     histoManager->Fill();
-//    G4AnalysisManager::Instance()->FillH1(1, totEdep);
-
 }
 
 

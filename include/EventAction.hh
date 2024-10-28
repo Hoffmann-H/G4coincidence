@@ -64,9 +64,6 @@ private:
   HistoManager* histoManager;
   DetectorConstruction* detectorConstruction;
   G4int  glEventID, glPrintModulo;
-  G4int  fHPGe_HCID;
-  G4int  fDet1_HCID;
-
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
