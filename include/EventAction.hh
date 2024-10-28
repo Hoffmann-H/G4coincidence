@@ -62,6 +62,7 @@ private:
   
   // data members
   HistoManager* histoManager;
+  DetectorConstruction* detectorConstruction;
   G4int  glEventID, glPrintModulo;
   G4int  fHPGe_HCID;
   G4int  fDet1_HCID;

@@ -72,8 +72,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     std::vector<G4String> fConstructPart; // list of parts to be constructed identified by name
     std::vector<G4Transform3D> fTransformPart; // corresponding global position information. Must have same size as fConstructPart.
+  public:
     std::vector<G4String> vecDetectorNames; // list of detector names for sensitive detector, EventAction and HistoManager.
-  
+
+  private:
     G4bool checkOverlaps;
     G4double fWorldSize;
     std::map<G4String,G4Material*> mat;

@@ -48,6 +48,7 @@ EventAction::EventAction(HistoManager* histo, DetectorConstruction* det)
   //       << "* DEBUG: EventAction::EventAction() is called! *" << G4endl
   //       << "************************************************" << G4endl;
   histoManager = histo;
+  detectorConstruction = det;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -77,6 +78,9 @@ void EventAction::BeginOfEventAction(const G4Event* evt)
 
 void EventAction::EndOfEventAction(const G4Event* evt)
 {
+    for (G4String name : detectorConstruction->vecDetectorNames)
+      G4cout << "EndOfEventAction knows detector " << name << G4endl;
+
     G4String HCName = "TU4HitsCollection";
     HPGeHitsCollection *HPGe_HC;
     fHPGe_HCID = G4SDManager::GetSDMpointer()->GetCollectionID(HCName);
