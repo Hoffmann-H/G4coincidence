@@ -44,6 +44,7 @@
 //#include "g4root.hh" // include g4root.hh for G4AnalysisManager
 
 class HistoMessenger;
+class EventAction;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -58,9 +59,11 @@ class HistoManager
     void SaveFile();
     void CloseFile();
     void SetResultsFile(G4String filename);
+    void SetEventAction(EventAction *evt);
 
   private:
     HistoMessenger *histoMessenger;
+    EventAction *eventAction;
     G4String fResFilename;
     G4bool fDoWriteHisto;
     G4bool fDoWriteTree;

@@ -32,6 +32,7 @@
 
 #include "HistoManager.hh"
 #include "HistoMessenger.hh"
+#include "EventAction.hh"
 #include "G4UnitsTable.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -58,7 +59,8 @@ HistoManager::~HistoManager()
 
 void HistoManager::Book()
 {
-  G4cout << "Create void histograms" << G4endl;
+  for (G4String name : eventAction->detectorConstruction->vecDetectorNames)
+    G4cout << "HistoManager knows detector " << name << G4endl;
   G4String hist_name = "H1Edep";
   G4String hist_title = "Energy deposition; E / keV; N";
   pH1Edep = new TH1F(hist_name.c_str(), hist_title.c_str(), 100, 0, 100);
@@ -114,6 +116,14 @@ void HistoManager::CloseFile()
 void HistoManager::SetResultsFile(G4String filename)
 {
     fResFilename = filename;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+
+void HistoManager::SetEventAction(EventAction *evt)
+{
+    eventAction = evt;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

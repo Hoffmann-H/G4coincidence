@@ -62,7 +62,9 @@ private:
   
   // data members
   HistoManager* histoManager;
+public:
   DetectorConstruction* detectorConstruction;
+private:
   G4int  glEventID, glPrintModulo;
 };
 

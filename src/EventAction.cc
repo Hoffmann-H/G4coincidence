@@ -48,6 +48,7 @@ EventAction::EventAction(HistoManager* histo, DetectorConstruction* det)
   //       << "* DEBUG: EventAction::EventAction() is called! *" << G4endl
   //       << "************************************************" << G4endl;
   histoManager = histo;
+  histoManager->SetEventAction(this);
   detectorConstruction = det;
 }
 
