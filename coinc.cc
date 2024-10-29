@@ -100,7 +100,7 @@ int main(int argc,char** argv) {
   }
   else  {
     //initialize G4 kernel
-    runManager->Initialize();
+    //runManager->Initialize();
 
     //batch mode
     G4String command = "/control/execute ";
