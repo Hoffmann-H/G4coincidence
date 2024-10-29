@@ -83,7 +83,7 @@ void EventAction::EndOfEventAction(const G4Event* evt)
     for (int iDet = 0; iDet < detectorConstruction->vecDetectorNames.size(); iDet++)
     {
       G4String name = detectorConstruction->vecDetectorNames.at(iDet);
-      G4cout << "EndOfEventAction knows detector " << name << G4endl;
+      //G4cout << "EndOfEventAction knows detector " << name << G4endl;
 
       G4String HCName = name + "HitsCollection";
       HPGeHitsCollection *HPGe_HC;

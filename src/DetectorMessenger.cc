@@ -78,7 +78,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
       G4double TransY = StoD(next());
       G4double TransZ = StoD(next());
       fDetectorConstruction->SetConstructPart(partName,
- RotAxis, Rotation, TransX, TransY, TransZ);
+          RotAxis, Rotation, TransX, TransY, TransZ);
   }
 }
 

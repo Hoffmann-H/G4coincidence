@@ -67,9 +67,8 @@ class HistoManager
     G4String fResFilename;
     G4bool fDoWriteHisto;
     G4bool fDoWriteTree;
-    G4double HPGeEdep;
-    G4double Det1Edep;
-    TH1F* pH1Edep;
+    G4double HPGeEdep[5]; // hard-coded max number of detectors. Can be changed into vector
+    //TH1F* pH1Edep;
     TTree* pEvtTree;
 };
 

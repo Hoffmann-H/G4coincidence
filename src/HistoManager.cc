@@ -42,8 +42,9 @@ HistoManager::HistoManager()
   fResFilename = "results/out.root";
   fDoWriteHisto = false;
   fDoWriteTree = true;
-  HPGeEdep = 0;
-  Det1Edep = 0;
+  HPGeEdep[0] = 0; // need this?
+  HPGeEdep[1] = 0;
+  HPGeEdep[2] = 0;
   histoMessenger = new HistoMessenger(this);
 }
 
@@ -52,42 +53,42 @@ HistoManager::HistoManager()
 HistoManager::~HistoManager()
 {
   //delete G4AnalysisManager::Instance();
-  delete pH1Edep;
+  //delete pH1Edep;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void HistoManager::Book()
 {
-  for (G4String name : eventAction->detectorConstruction->vecDetectorNames)
-    G4cout << "HistoManager knows detector " << name << G4endl;
-  G4String hist_name = "H1Edep";
-  G4String hist_title = "Energy deposition; E / keV; N";
-  pH1Edep = new TH1F(hist_name.c_str(), hist_title.c_str(), 100, 0, 100);
+  //G4String hist_name = "H1Edep";
+  //G4String hist_title = "Energy deposition; E / keV; N";
+  //pH1Edep = new TH1F(hist_name.c_str(), hist_title.c_str(), 100, 0, 100);
 
   pEvtTree = new TTree("tEvt", "event tree");
-  pEvtTree->Branch("det0", &HPGeEdep);
-  pEvtTree->Branch("det1", &Det1Edep);
+  G4cout << "HistoManager knows " << eventAction->detectorConstruction->vecDetectorNames.size() << " detectors" << G4endl;
+  for (int i = 0; i < eventAction->detectorConstruction->vecDetectorNames.size(); i++) {
+    G4String name = eventAction->detectorConstruction->vecDetectorNames.at(i);
+    G4cout << "HistoManager knows detector " << name << G4endl;
+    pEvtTree->Branch(name.c_str(), &(HPGeEdep[i]));
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void HistoManager::SetEdep(G4int det, G4double edep)
 {
-  // Edeps to be changed into an array
-  if (det == 0)
-    HPGeEdep = edep;
-  else if (det == 1)
-    Det1Edep = edep;
-  else G4cout << "Unknown detector id: " << det << G4endl;
+  //G4cout << eventAction->detectorConstruction->vecDetectorNames.at(det) << " " << edep << " keV" << G4endl;
+  // Fill Edep into array
+  HPGeEdep[det] = edep;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void HistoManager::Fill()
 {
-  if (fDoWriteHisto) pH1Edep->Fill(HPGeEdep);///CLHEP::keV);
-  if (fDoWriteTree) pEvtTree->Fill();
+  //if (fDoWriteHisto) pH1Edep->Fill(HPGeEdep);///CLHEP::keV);
+  //if (fDoWriteTree)
+  pEvtTree->Fill();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -95,8 +96,9 @@ void HistoManager::Fill()
 void HistoManager::SaveFile()
 {
   TFile* f = TFile::Open(fResFilename.c_str(), "UPDATE");
-  if (fDoWriteHisto) pH1Edep->Write("", TObject::kOverwrite);
-  if (fDoWriteTree) pEvtTree->Write("", TObject::kOverwrite);
+  //if (fDoWriteHisto) pH1Edep->Write("", TObject::kOverwrite);
+  //if (fDoWriteTree) 
+  pEvtTree->Write("", TObject::kOverwrite);
   f->Save();
   f->Close();
   G4cout << "Save file" << G4endl;
