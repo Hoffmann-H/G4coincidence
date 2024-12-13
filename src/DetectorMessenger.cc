@@ -80,6 +80,18 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
       fDetectorConstruction->SetConstructPart(partName,
           RotAxis, Rotation, TransX, TransY, TransZ);
   }
+  if (command == fHPGeDimensionsCmd)
+  {
+      // Extract dimension double values
+      G4Tokenizer next(newValue);
+      G4double crystal_diameter = StoD(next());
+      G4double crystal_length = StoD(next());
+      G4double distance_crystal_cryostat_outside = StoD(next());
+      G4double cryostat_thickness = StoD(next());
+      G4double cryostat_diameter = StoD(next());
+      G4double cryostat_length = StoD(next());
+      fDetectorConstruction->SetGenericHPGeDimensions(crystal_diameter, crystal_length, distance_crystal_cryostat_outside, cryostat_thickness, cryostat_diameter, cryostat_length);
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

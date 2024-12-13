@@ -58,6 +58,7 @@ class DetectorMessenger: public G4UImessenger
     
     G4UIdirectory*             fSetupDir;
     G4UIcmdWithAString*        fPlaceCmd;
+    G4UIcmdWithAString*        fHPGeDimensionsCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -77,6 +77,19 @@ void DetectorConstruction::SetConstructPart(G4String name, G4String axis, G4doub
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+void DetectorConstruction::SetGenericHPGeDimensions(G4double crystal_diameter, G4double crystal_length, G4double distance_crystal_cryostat_outside, G4double cryostat_thickness, G4double cryostat_diameter, G4double cryostat_length)
+{
+    G4cout << "DEBUG: Set generic HPGe detector dimensions: " << G4endl
+           << "crystal_diameter: " << crystal_diameter << G4endl
+           << "crystal_length: " << crystal_length << G4endl
+           << "distance_crystal_cryostat_outside: " << distance_crystal_cryostat_outside << G4endl
+           << "cryostat_thickness: " << cryostat_thickness << G4endl
+           << "cryostat_diameter: " << cryostat_diameter << G4endl
+           << "cryostat_length: " << cryostat_length << G4endl;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 void DetectorConstruction::BuildMaterials()
 { // Define materials via NIST manager
   auto nist = G4NistManager::Instance();
@@ -340,6 +353,16 @@ void DetectorConstruction::ConstructScintillator(G4LogicalVolume* mother_logical
   AddDetectorName(detectorName);
 }
 
+void DetectorConstruction::ConstructGenericHPGe(G4LogicalVolume* mother_logical, G4Transform3D& global_transform, G4int generic_HPGe_index)
+{
+    G4cout << "DEBUG: Construct HPGe detector " << generic_HPGe_index << " with dimensions: " << G4endl
+           << "crystal_diameter: " << vecGenericHPGeDimensions[generic_HPGe_index].crystal_diameter << G4endl
+           << "crystal_length: " << vecGenericHPGeDimensions[generic_HPGe_index].crystal_length << G4endl
+           << "distance_crystal_cryostat_outside: " << vecGenericHPGeDimensions[generic_HPGe_index].distance_crystal_cryostat_outside << G4endl
+           << "cryostat_thickness: " << vecGenericHPGeDimensions[generic_HPGe_index].cryostat_thickness << G4endl
+           << "cryostat_diameter: " << vecGenericHPGeDimensions[generic_HPGe_index].cryostat_diameter << G4endl
+           << "cryostat_length: " << vecGenericHPGeDimensions[generic_HPGe_index].cryostat_length << G4endl;    
+}
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DetectorConstruction::ConstructAsContainer1(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
