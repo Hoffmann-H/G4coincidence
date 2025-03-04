@@ -64,9 +64,9 @@ class PrimaryMessenger: public G4UImessenger
     G4UIcmdWithAString*          fPrimaryIonCmd;
     G4UIcmdWithADouble*          fPrimaryECbranchingCmd;
     G4UIcmdWithADoubleAndUnit*   fDaughterExcitEnergyCmd;
-    //G4UIcmdWithABool*          fPrimaryWriteCmd;
-    //G4UIcmdWithABool*          fTTreeWriteCmd;
-    //G4UIcmdWithAString*        fFilenameCmd;
+    G4UIcmdWithADouble*          fSourceVolumeRadiusCmd;
+    G4UIcmdWithADouble*          fSourceVolumeThicknessCmd;
+    G4UIcmdWithADouble*          fSourceVolumeZcenterCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

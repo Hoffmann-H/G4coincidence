@@ -61,6 +61,18 @@ PrimaryMessenger::PrimaryMessenger(PrimaryGenerator* Primary)
   fDaughterExcitEnergyCmd = new G4UIcmdWithADoubleAndUnit("/primary/daughterExcitEnergy",this);
   fDaughterExcitEnergyCmd->SetGuidance("define excitation energy of EC daughter nucleus");
   fDaughterExcitEnergyCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  fSourceVolumeRadiusCmd = new G4UIcmdWithADouble("/primary/sourceVolumeRadius",this);
+  fSourceVolumeRadiusCmd->SetGuidance("define radius of cylindical source volume in mm");
+  fSourceVolumeRadiusCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  fSourceVolumeThicknessCmd = new G4UIcmdWithADouble("/primary/sourceVolumeThickness",this);
+  fSourceVolumeThicknessCmd->SetGuidance("define thickness of cylindical source volume in mm");
+  fSourceVolumeThicknessCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  fSourceVolumeZcenterCmd = new G4UIcmdWithADouble("/primary/sourceVolumeZcenter",this);
+  fSourceVolumeZcenterCmd->SetGuidance("define center z coordinate of cylindical source volume in mm");
+  fSourceVolumeZcenterCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -89,9 +101,17 @@ void PrimaryMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   {
       fPrimary->SetECbranching(fPrimaryECbranchingCmd->GetNewDoubleValue(newValue));
   }
-  if (command == fDaughterExcitEnergyCmd)
+  if (command == fSourceVolumeRadiusCmd)
   {
-      fPrimary->SetDaughterExcitEnergy(fDaughterExcitEnergyCmd->GetNewDoubleValue(newValue));
+      fPrimary->SetSourceVolumeRadius(fSourceVolumeRadiusCmd->GetNewDoubleValue(newValue));
+  }
+  if (command == fSourceVolumeThicknessCmd)
+  {
+      fPrimary->SetSourceVolumeThickness(fSourceVolumeThicknessCmd->GetNewDoubleValue(newValue));
+  }
+  if (command == fSourceVolumeZcenterCmd)
+  {
+      fPrimary->SetSourceVolumeZcenter(fSourceVolumeZcenterCmd->GetNewDoubleValue(newValue));
   }
 }
 

@@ -49,6 +49,9 @@ class PrimaryGenerator : public G4VPrimaryGenerator
     void SetIonZandA(G4int Z, G4int A);
     void SetECbranching(G4double branching);
     void SetDaughterExcitEnergy(G4double excitEnergy);
+    void SetSourceVolumeRadius(G4double value);
+    void SetSourceVolumeThickness(G4double value);
+    void SetSourceVolumeZcenter(G4double value);
 
   public:
     PrimaryMessenger* primaryMessenger;
@@ -58,6 +61,9 @@ class PrimaryGenerator : public G4VPrimaryGenerator
     G4int ionZ, ionA;
     G4double ECbranching;
     G4double daughterExcitEnergy;
+    G4double sourceVolumeRadius;
+    G4double sourceVolumeThickness;
+    G4double sourceVolumeZcenter;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

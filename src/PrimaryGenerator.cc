@@ -57,6 +57,9 @@ PrimaryGenerator::PrimaryGenerator()
     ionA = 76;
     ECbranching = 0.0;
     daughterExcitEnergy = 0.0*keV;
+    sourceVolumeRadius = 0;
+    sourceVolumeThickness = 0;
+    sourceVolumeZcenter = 0;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -84,10 +87,12 @@ void PrimaryGenerator::SetDaughterExcitEnergy(G4double excitEnergy)
 
 void PrimaryGenerator::GeneratePrimaryVertex(G4Event* event)
 {
-  // experimental: Tr
-
   //vertex position
-  G4ThreeVector position(0.0,0.0,0.0);
+  G4double Phi = CLHEP::RandFlat::shoot(0.0, 2.0*M_PI);     // phi uniform
+  G4double R = sqrt(CLHEP::RandFlat::shoot(0.0, 1.0)) * sourceVolumeRadius; // radius linear
+  G4double Z = sourceVolumeZcenter - 0.5*sourceVolumeThickness + CLHEP::RandFlat::shoot(0.0, sourceVolumeThickness);
+  G4ThreeVector position(R*cos(Phi)*CLHEP::mm, R*sin(Phi)*CLHEP::mm, Z*CLHEP::mm);
+  //G4cout << sourceVolumeZcenter << "\t" << sourceVolumeThickness << "\t" << sourceVolumeRadius << "\t" << Z << "\t" << R << G4endl;
   
   // randomly choose original ion or hand-made EC according to branching ratio
   G4double random_number = CLHEP::RandFlat::shoot(0.0, 1.0);
@@ -137,9 +142,30 @@ void PrimaryGenerator::GeneratePrimaryVertex(G4Event* event)
     particle3->SetKineticEnergy(9.8*keV);
     //
     vertexB->SetPrimary(particle2);
-    vertexB->SetPrimary(particle3);  
+    vertexB->SetPrimary(particle3);
     event->AddPrimaryVertex(vertexB);
   }
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PrimaryGenerator::SetSourceVolumeRadius(G4double value)
+{
+  sourceVolumeRadius = value;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PrimaryGenerator::SetSourceVolumeThickness(G4double value)
+{
+  sourceVolumeThickness = value;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PrimaryGenerator::SetSourceVolumeZcenter(G4double value)
+{
+  sourceVolumeZcenter = value;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

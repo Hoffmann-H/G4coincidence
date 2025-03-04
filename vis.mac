@@ -15,10 +15,16 @@
 #/geometry/setup/TU5 Y -90 3.0 0 0
 #/geometry/setup/sample1 Y -90 0 0 0
 # Scintillator anti-coincidence setup
-/geometry/setup/place Scint X 0 0 0 0
-/geometry/setup/place TU4 X 0 0 0 -11
-/geometry/setup/place TU2 X 180 0 0 11
-/geometry/setup/place sample2 X 0 0 0 -2.5
+#/geometry/setup/place Scint X 0 0 0 0
+#/geometry/setup/place TU4 X 0 0 0 -11
+#/geometry/setup/place TU2 X 180 0 0 11
+#/geometry/setup/place sample2 X 0 0 0 -2.5
+# Generic detector setup
+/geometry/setup/place GenericHPGe X 0 0 0 0
+/geometry/setup/place sample2 X 0 0 0 1
+/primary/sourceVolumeZcenter 1
+/primary/sourceVolumeThickness 0.137
+/primary/sourceVolumeRadius 11
 #
 /primary/ion 33 76
 /primary/ECbranching 0.0

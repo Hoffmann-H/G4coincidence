@@ -84,6 +84,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void ConstructAsContainer2(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructGenericHPGe(G4LogicalVolume* mother_logical, G4Transform3D& global_transform, G4int generic_HPGe_index);
 
+    HPGeDimensions genericHPGeDimensions;
     std::vector<HPGeDimensions> vecGenericHPGeDimensions;
 
     std::vector<G4String> fConstructPart; // list of parts to be constructed identified by name

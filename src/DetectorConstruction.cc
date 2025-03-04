@@ -55,6 +55,13 @@ DetectorConstruction::DetectorConstruction()
 {
   fWorldSize = 1.0*m;
   fDetectorMessenger = new DetectorMessenger(this);
+
+  genericHPGeDimensions.crystal_diameter = 5*cm;
+  genericHPGeDimensions.crystal_length = 5*cm;
+  genericHPGeDimensions.distance_crystal_cryostat_outside = 1*cm;
+  genericHPGeDimensions.cryostat_thickness = 0.15*cm;
+  genericHPGeDimensions.cryostat_diameter = 7*cm;
+  genericHPGeDimensions.cryostat_length = 7*cm;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -73,6 +80,10 @@ void DetectorConstruction::SetConstructPart(G4String name, G4String axis, G4doub
     if (axis == "Z") rotate = G4RotateZ3D(rot/180.*M_PI);
     G4Transform3D translate = G4Translate3D(x*mm, y*mm, z*mm);
     fTransformPart.push_back(translate*rotate);
+
+    if (name == "GenericHPGe") {
+        vecGenericHPGeDimensions.push_back(genericHPGeDimensions);
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -86,6 +97,13 @@ void DetectorConstruction::SetGenericHPGeDimensions(G4double crystal_diameter, G
            << "cryostat_thickness: " << cryostat_thickness << G4endl
            << "cryostat_diameter: " << cryostat_diameter << G4endl
            << "cryostat_length: " << cryostat_length << G4endl;
+
+    genericHPGeDimensions.crystal_diameter = crystal_diameter;
+    genericHPGeDimensions.crystal_length = crystal_length;
+    genericHPGeDimensions.distance_crystal_cryostat_outside = distance_crystal_cryostat_outside;
+    genericHPGeDimensions.cryostat_thickness = cryostat_thickness;
+    genericHPGeDimensions.cryostat_diameter = cryostat_diameter;
+    genericHPGeDimensions.cryostat_length = cryostat_length;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -362,6 +380,69 @@ void DetectorConstruction::ConstructGenericHPGe(G4LogicalVolume* mother_logical,
            << "cryostat_thickness: " << vecGenericHPGeDimensions[generic_HPGe_index].cryostat_thickness << G4endl
            << "cryostat_diameter: " << vecGenericHPGeDimensions[generic_HPGe_index].cryostat_diameter << G4endl
            << "cryostat_length: " << vecGenericHPGeDimensions[generic_HPGe_index].cryostat_length << G4endl;    
+    G4double crystal_diameter = vecGenericHPGeDimensions[generic_HPGe_index].crystal_diameter;
+    G4double crystal_length = vecGenericHPGeDimensions[generic_HPGe_index].crystal_length;
+    G4double distance_crystal_cryostat_outside = vecGenericHPGeDimensions[generic_HPGe_index].distance_crystal_cryostat_outside;
+    G4double cryostat_thickness = vecGenericHPGeDimensions[generic_HPGe_index].cryostat_thickness;
+    G4double cryostat_diameter = vecGenericHPGeDimensions[generic_HPGe_index].cryostat_diameter;
+    G4double cryostat_length = vecGenericHPGeDimensions[generic_HPGe_index].cryostat_length;
+    G4double dead_layer_front = 0.2*CLHEP::mm;
+    G4double dead_layer_side = 0.2*CLHEP::mm;
+
+    // crystal
+    G4double crystal_rmin = 0.0;
+    G4double crystal_rmax = 0.5*crystal_diameter;
+    G4double crystal_dz = crystal_length;
+    G4Transform3D crystal_internal_rotate = G4Rotate3D();
+    G4Transform3D crystal_internal_translate = G4Translate3D(0.0, 0.0,
+      -0.5*crystal_length - distance_crystal_cryostat_outside);
+    G4Transform3D crystal_total_transform = global_transform*crystal_internal_translate*crystal_internal_rotate;
+    G4Tubs* solidCrystal = new G4Tubs("solidCrystal",
+      crystal_rmin, crystal_rmax, crystal_dz/2, 0, 2*M_PI);
+    G4LogicalVolume* logicCrystal = new G4LogicalVolume(
+      solidCrystal, mat["Ge"], "logicCrystal");
+    G4VPhysicalVolume* physiCrystal = new G4PVPlacement(
+      crystal_total_transform, logicCrystal, "physiCrystal", mother_logical, false, 0);
+
+    // sensitive part of crystal
+    G4double sens_rmin = 0.0;
+    G4double sens_rmax = 0.5*crystal_diameter - dead_layer_side;
+    G4double sens_dz = crystal_length - 2.0*dead_layer_front;
+
+    // unique detector name
+    G4String detectorName = "HPGe" + std::__cxx11::to_string(generic_HPGe_index);
+    // construct sensitive part
+    G4Tubs* solidSens = new G4Tubs("solid"+detectorName,
+      sens_rmin, sens_rmax, sens_dz/2, 0, 2*M_PI);
+    G4LogicalVolume* logicSens = new G4LogicalVolume(
+      solidSens, mat["Ge"], "logic"+detectorName);
+    logicSens->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
+    G4VPhysicalVolume* physiSens = new G4PVPlacement(
+      0, G4ThreeVector(), logicSens, "physi"+detectorName, logicCrystal, false, 0);
+    // register the sensitive logic volume name for sensitive detector
+    AddDetectorName(detectorName);
+
+    // end cap
+    const int cap_num_planes = 4;
+    const G4double cap_z_plane[cap_num_planes] = {0.0,
+      -cryostat_thickness,
+      -cryostat_thickness,
+      -distance_crystal_cryostat_outside-crystal_length};
+    const G4double cap_inner_r[cap_num_planes] = {0.0, 0.0,
+      cryostat_diameter/2-cryostat_thickness,
+      cryostat_diameter/2-cryostat_thickness};
+    const G4double cap_outer_r[cap_num_planes] = {
+      cryostat_diameter/2,
+      cryostat_diameter/2,
+      cryostat_diameter/2,
+      cryostat_diameter/2};
+    G4Transform3D cap_total_transform = global_transform;
+    G4Polycone* solidCap = new G4Polycone("solidCap", 0, 2*M_PI,
+      cap_num_planes, cap_z_plane, cap_inner_r, cap_outer_r);
+    G4LogicalVolume* logicCap = new G4LogicalVolume(
+      solidCap, mat["Al"], "logicCap");
+    G4VPhysicalVolume* physiCap = new G4PVPlacement(
+      cap_total_transform, logicCap, "physiCap", mother_logical, false, 0);
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -469,6 +550,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   //
   // Construct optional parts including detectors and non-detector parts like samples
   //
+  G4int generic_HPGe_index = 0;
   for (int i = 0; i < fConstructPart.size(); i++) {
     G4String name = fConstructPart.at(i);
     G4Transform3D trans = fTransformPart.at(i);
@@ -476,6 +558,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     if (name == "TU4") ConstructTU4Detector(logicWorld, trans);
     if (name == "TU5") ConstructTU5Detector(logicWorld, trans);
     if (name == "Scint") ConstructScintillator(logicWorld, trans);
+    if (name == "GenericHPGe") {
+        ConstructGenericHPGe(logicWorld, trans, generic_HPGe_index);
+        generic_HPGe_index++;
+    }
     if (name == "sample1") ConstructAsContainer1(logicWorld, trans);
     if (name == "sample2") ConstructAsContainer2(logicWorld, trans);
   }

@@ -53,6 +53,10 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fPlaceCmd = new G4UIcmdWithAString("/geometry/setup/place",this);
   fPlaceCmd->SetGuidance("specify construction of optional parts. They will be recognezed by name. Parameters: name (X|Y|Z) Rotation/degrees translation(X Y Z)/mm");
   fPlaceCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  fHPGeDimensionsCmd = new G4UIcmdWithAString("/geometry/setup/place",this);
+  fHPGeDimensionsCmd->SetGuidance("specify dimensions of generic HPGe. They will be recognezed by name. Parameters: crystal_diameter/mm crystal_length/mm distance_crystal_cryostat_outside/mm cryostat_thickness/mm cryostat_diameter/mm cryostat_length");
+  fHPGeDimensionsCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

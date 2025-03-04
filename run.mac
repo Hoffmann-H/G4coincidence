@@ -18,7 +18,7 @@
 #
 /run/initialize
 #
-#/histo/file results/out.root
+/histo/file results/deleteme.root
 #
 #/run/printProgress 100000
 #
