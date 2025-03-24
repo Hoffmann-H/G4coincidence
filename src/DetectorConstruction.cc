@@ -179,7 +179,50 @@ void DetectorConstruction::ConstructTU5Detector(G4LogicalVolume* mother_logical,
   G4String detectorName = "TU5";
   // construct sensitive part
   G4Tubs* sens_solid = new G4Tubs("solidSDD", sens_rmin, sens_rmax, 0.5*sens_dz, sens_sphi, sens_dphi);
-  G4LogicalVolume *sens_logical = new G4LogicalVolume(sens_solid, mat["Si"], "logicSDD");
+  G4LogicalVolume *sens_logical = new G4LogicalVolume(sens_solid, mat["Si"], "logicTU5");
+  sens_logical->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
+  new G4PVPlacement(sens_total_transform, sens_logical, "physiSDD", mother_logical, false, 0, checkOverlaps);
+  // register the sensitive logic volume name for sensitive detector
+  AddDetectorName(detectorName);
+
+  G4Tubs* window_solid = new G4Tubs("solidBeWindow", window_rmin, window_rmax, 0.5*window_dz, window_sphi, window_dphi);
+  G4LogicalVolume *window_logical = new G4LogicalVolume(window_solid, mat["Be"], "logicBeWindow");
+  new G4PVPlacement(window_total_transform, window_logical, "physiBeWindow", mother_logical, false, 0, checkOverlaps);
+}
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+// Construct the TU3 SDD X-ray detector,
+// with frontent point at given frontend_position and given rotation.
+// frontend point := intersection of sensor rotation axis with front layer of housing
+{
+  // Si sensitive part
+  G4double sens_depth = 10.0*mm; // distance between front layer of enrance window and front layer of Si sensor; tuned to match efficiency at 1cm
+  G4double sens_dz = 0.45*mm;
+  G4double sens_rmin = 0.0*mm;
+  G4double sens_rmax = 5.046*mm; // area = 150mm^2 = pi*r^2
+  G4double sens_sphi = 0.0;
+  G4double sens_dphi = 2.0*M_PI;
+  G4Transform3D sens_internal_rotate = G4Rotate3D();
+  G4Transform3D sens_internal_translate = G4Translate3D(0.0, 0.0, -sens_depth-0.5*sens_dz);
+  G4Transform3D sens_total_transform = global_transform*sens_internal_translate*sens_internal_rotate;
+
+  // Be entrance window
+  G4double window_dz = 0.025*mm;
+  G4double window_rmin = sens_rmin;
+  G4double window_rmax = sens_rmax;
+  G4double window_sphi = sens_sphi;
+  G4double window_dphi = sens_dphi;
+  G4Transform3D window_internal_rotate = G4Rotate3D();
+  G4Transform3D window_internal_translate = G4Translate3D(0.0, 0.0, 0.5*window_dz);
+  G4Transform3D window_total_transform = global_transform*window_internal_translate*window_internal_rotate;
+
+
+  // unique detector name
+  G4String detectorName = "TU3";
+  // construct sensitive part
+  G4Tubs* sens_solid = new G4Tubs("solidSDD", sens_rmin, sens_rmax, 0.5*sens_dz, sens_sphi, sens_dphi);
+  G4LogicalVolume *sens_logical = new G4LogicalVolume(sens_solid, mat["Si"], "logic"+detectorName);
   sens_logical->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
   new G4PVPlacement(sens_total_transform, sens_logical, "physiSDD", mother_logical, false, 0, checkOverlaps);
   // register the sensitive logic volume name for sensitive detector
@@ -555,6 +598,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     G4String name = fConstructPart.at(i);
     G4Transform3D trans = fTransformPart.at(i);
     if (name == "TU2") ConstructTU2Detector(logicWorld, trans);
+    if (name == "TU3") ConstructTU3Detector(logicWorld, trans);
     if (name == "TU4") ConstructTU4Detector(logicWorld, trans);
     if (name == "TU5") ConstructTU5Detector(logicWorld, trans);
     if (name == "Scint") ConstructScintillator(logicWorld, trans);

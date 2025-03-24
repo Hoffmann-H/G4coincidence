@@ -77,6 +77,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void BuildMaterials();
     void AddDetectorName(G4String name);
     void ConstructTU2Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
+    void ConstructTU3Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructTU4Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructTU5Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructScintillator(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
