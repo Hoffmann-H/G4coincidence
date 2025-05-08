@@ -101,6 +101,10 @@ void PrimaryMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   {
       fPrimary->SetECbranching(fPrimaryECbranchingCmd->GetNewDoubleValue(newValue));
   }
+  if (command == fDaughterExcitEnergyCmd)
+  {
+      fPrimary->SetDaughterExcitEnergy(fDaughterExcitEnergyCmd->GetNewDoubleValue(newValue));
+  }
   if (command == fSourceVolumeRadiusCmd)
   {
       fPrimary->SetSourceVolumeRadius(fSourceVolumeRadiusCmd->GetNewDoubleValue(newValue));

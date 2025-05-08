@@ -210,7 +210,7 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
   // Be entrance window
   G4double window_dz = 0.025*mm;
   G4double window_rmin = sens_rmin;
-  G4double window_rmax = sens_rmax;
+  G4double window_rmax = 10.*mm;
   G4double window_sphi = sens_sphi;
   G4double window_dphi = sens_dphi;
   G4Transform3D window_internal_rotate = G4Rotate3D();
