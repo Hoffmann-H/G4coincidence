@@ -40,6 +40,7 @@ class DetectorConstruction;
 class G4UIdirectory;
 class G4UIcommand;
 class G4UIcmdWithAString;
+class G4UIcmdWithADoubleAndUnit;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -59,6 +60,8 @@ class DetectorMessenger: public G4UImessenger
     G4UIdirectory*             fSetupDir;
     G4UIcmdWithAString*        fPlaceCmd;
     G4UIcmdWithAString*        fHPGeDimensionsCmd;
+    G4UIcmdWithADoubleAndUnit* fAsLayerThicknessCmd;
+    G4UIcmdWithADoubleAndUnit* fAsCoverThicknessCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

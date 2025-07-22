@@ -70,6 +70,14 @@ PrimaryMessenger::PrimaryMessenger(PrimaryGenerator* Primary)
   fSourceVolumeThicknessCmd->SetGuidance("define thickness of cylindical source volume in mm");
   fSourceVolumeThicknessCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  fSourceVolumeXcenterCmd = new G4UIcmdWithADouble("/primary/sourceVolumeXcenter",this);
+  fSourceVolumeXcenterCmd->SetGuidance("define center x coordinate of cylindical source volume in mm");
+  fSourceVolumeXcenterCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  fSourceVolumeYcenterCmd = new G4UIcmdWithADouble("/primary/sourceVolumeYcenter",this);
+  fSourceVolumeYcenterCmd->SetGuidance("define center y coordinate of cylindical source volume in mm");
+  fSourceVolumeYcenterCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
   fSourceVolumeZcenterCmd = new G4UIcmdWithADouble("/primary/sourceVolumeZcenter",this);
   fSourceVolumeZcenterCmd->SetGuidance("define center z coordinate of cylindical source volume in mm");
   fSourceVolumeZcenterCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
@@ -83,6 +91,10 @@ PrimaryMessenger::~PrimaryMessenger()
   delete fPrimaryIonCmd;
   delete fPrimaryECbranchingCmd;
   delete fDaughterExcitEnergyCmd;
+  delete fSourceVolumeRadiusCmd;
+  delete fSourceVolumeXcenterCmd;
+  delete fSourceVolumeYcenterCmd;
+  delete fSourceVolumeZcenterCmd;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -112,6 +124,14 @@ void PrimaryMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   if (command == fSourceVolumeThicknessCmd)
   {
       fPrimary->SetSourceVolumeThickness(fSourceVolumeThicknessCmd->GetNewDoubleValue(newValue));
+  }
+  if (command == fSourceVolumeXcenterCmd)
+  {
+      fPrimary->SetSourceVolumeXcenter(fSourceVolumeXcenterCmd->GetNewDoubleValue(newValue));
+  }
+  if (command == fSourceVolumeYcenterCmd)
+  {
+      fPrimary->SetSourceVolumeYcenter(fSourceVolumeYcenterCmd->GetNewDoubleValue(newValue));
   }
   if (command == fSourceVolumeZcenterCmd)
   {

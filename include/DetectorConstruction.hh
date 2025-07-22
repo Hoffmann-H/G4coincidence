@@ -71,6 +71,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     void SetConstructPart(G4String name, G4String axis, G4double rot, G4double x, G4double y, G4double z);
     void SetGenericHPGeDimensions(G4double crystal_diameter, G4double crystal_length, G4double distance_crystal_cryostat_outside, G4double cryostat_thickness, G4double cryostat_diameter, G4double cryostat_length);
+    void SetAsLayerThickness(G4double As_layer_thickness);
+    void SetAsCoverThickness(G4double As_cover_thickness);
     
   private:
     DetectorMessenger *fDetectorMessenger;
@@ -83,10 +85,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void ConstructScintillator(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructAsContainer1(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructAsContainer2(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
+    void ConstructAsContainer3(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructGenericHPGe(G4LogicalVolume* mother_logical, G4Transform3D& global_transform, G4int generic_HPGe_index);
 
     HPGeDimensions genericHPGeDimensions;
     std::vector<HPGeDimensions> vecGenericHPGeDimensions;
+    G4double AsLayerThickness;
+    G4double AsCoverThickness;
 
     std::vector<G4String> fConstructPart; // list of parts to be constructed identified by name
     std::vector<G4Transform3D> fTransformPart; // corresponding global position information. Must have same size as fConstructPart.

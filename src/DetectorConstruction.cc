@@ -121,6 +121,7 @@ void DetectorConstruction::BuildMaterials()
   mat["concrete"] = nist->FindOrBuildMaterial("G4_CONCRETE");
   mat["PMMA"] = nist->FindOrBuildMaterial("G4_PLEXIGLASS");
   mat["polycarbonate"] = nist->FindOrBuildMaterial("G4_POLYCARBONATE");
+  G4cout << "G4_POLYCARBONATE density: " << mat["polycarbonate"]->GetDensity()/(g/cm3) << " g/cm3" << G4endl;
   G4Element* As = nist->FindOrBuildElement(33);
   G4Element* O = nist->FindOrBuildElement(8);
   mat["As2O3"] = new G4Material("As2O3", 3.74*g/cm3, 2, kStateSolid);
@@ -134,6 +135,20 @@ void DetectorConstruction::BuildMaterials()
 
   //G4Ele
   //TODO: peltier, tantalum collimator
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::SetAsLayerThickness(G4double As_layer_thickness)
+{
+  AsLayerThickness = As_layer_thickness;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::SetAsCoverThickness(G4double As_cover_thickness)
+{
+  AsCoverThickness = As_cover_thickness;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -197,10 +212,10 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
 // frontend point := intersection of sensor rotation axis with front layer of housing
 {
   // Si sensitive part
-  G4double sens_depth = 10.0*mm; // distance between front layer of enrance window and front layer of Si sensor; tuned to match efficiency at 1cm
+  G4double sens_depth = 2.0*mm; // distance between front layer of enrance window and front layer of Si sensor; tuned to match efficiency at 1cm
   G4double sens_dz = 0.45*mm;
   G4double sens_rmin = 0.0*mm;
-  G4double sens_rmax = 5.046*mm; // area = 150mm^2 = pi*r^2
+  G4double sens_rmax = 5.046*mm; // area = 80mm^2 = pi*r^2
   G4double sens_sphi = 0.0;
   G4double sens_dphi = 2.0*M_PI;
   G4Transform3D sens_internal_rotate = G4Rotate3D();
@@ -562,6 +577,41 @@ void DetectorConstruction::ConstructAsContainer2(G4LogicalVolume* mother_logical
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+
+void DetectorConstruction::ConstructAsContainer3(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+// Construct a proposed 3rd As sample holder fitting into TU2's borehole.
+// A layer of As2O3 surrounded by varying thickness of varying material.
+// Measures editable by command: As layer thickness, holder thickness. Holder material?
+// Central point equals the central point of the As layer.
+{
+  G4double As_radius = 6.5*mm;
+  G4double bottom_window_thickness = 1.0*mm;
+  G4double cont_total_z = bottom_window_thickness + AsLayerThickness + AsCoverThickness;
+  G4double cont_total_r = 7.75*mm;
+
+  // construct the container
+  const int cont_num_planes = 4;
+  G4Tubs* solidCont = new G4Tubs("solidCont", 0, cont_total_r, cont_total_z/2, 0.0, 2*M_PI);
+  G4LogicalVolume* logicCont = new G4LogicalVolume(
+    solidCont, mat["polycarbonate"], "logicCont");
+  G4Transform3D cont_internal_translate = G4Translate3D(0.0, 0.0, AsCoverThickness/2 + AsLayerThickness/2);
+  G4Transform3D cont_total_transform = global_transform*cont_internal_translate;
+  G4VPhysicalVolume* physiCont = new G4PVPlacement(
+    cont_total_transform, logicCont, "physiCont", mother_logical, false, 0);
+  
+  // Place the As layer into the container
+  G4Tubs* solidSample = new G4Tubs("solidSample",
+    0, As_radius, AsLayerThickness/2, 0, 2*M_PI);
+  G4LogicalVolume* logicSample = new G4LogicalVolume(
+    solidSample, mat["As2O3"], "logicSample");
+  logicSample->SetVisAttributes(new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)));
+  G4Transform3D As_internal_translate = G4Translate3D(0.0, 0.0, -AsCoverThickness/2 - AsLayerThickness/2);
+  G4VPhysicalVolume* physiSample = new G4PVPlacement(
+    As_internal_translate, logicSample, "physiSample", logicCont, false, 0);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
   // Option to switch on/off checking of volumes overlaps
@@ -608,6 +658,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     }
     if (name == "sample1") ConstructAsContainer1(logicWorld, trans);
     if (name == "sample2") ConstructAsContainer2(logicWorld, trans);
+    if (name == "sample3") ConstructAsContainer3(logicWorld, trans);
   }
 
   //

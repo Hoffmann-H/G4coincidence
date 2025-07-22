@@ -59,6 +59,8 @@ PrimaryGenerator::PrimaryGenerator()
     daughterExcitEnergy = 0.0*keV;
     sourceVolumeRadius = 0;
     sourceVolumeThickness = 0;
+    sourceVolumeXcenter = 0;
+    sourceVolumeYcenter = 0;
     sourceVolumeZcenter = 0;
 }
 
@@ -167,6 +169,20 @@ void PrimaryGenerator::SetSourceVolumeRadius(G4double value)
 void PrimaryGenerator::SetSourceVolumeThickness(G4double value)
 {
   sourceVolumeThickness = value;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PrimaryGenerator::SetSourceVolumeXcenter(G4double value)
+{
+  sourceVolumeXcenter = value;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PrimaryGenerator::SetSourceVolumeYcenter(G4double value)
+{
+  sourceVolumeYcenter = value;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

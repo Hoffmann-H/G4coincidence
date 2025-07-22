@@ -66,6 +66,8 @@ class PrimaryMessenger: public G4UImessenger
     G4UIcmdWithADoubleAndUnit*   fDaughterExcitEnergyCmd;
     G4UIcmdWithADouble*          fSourceVolumeRadiusCmd;
     G4UIcmdWithADouble*          fSourceVolumeThicknessCmd;
+    G4UIcmdWithADouble*          fSourceVolumeXcenterCmd;
+    G4UIcmdWithADouble*          fSourceVolumeYcenterCmd;
     G4UIcmdWithADouble*          fSourceVolumeZcenterCmd;
 };
 

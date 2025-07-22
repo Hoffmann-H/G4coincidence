@@ -51,6 +51,8 @@ class PrimaryGenerator : public G4VPrimaryGenerator
     void SetDaughterExcitEnergy(G4double excitEnergy);
     void SetSourceVolumeRadius(G4double value);
     void SetSourceVolumeThickness(G4double value);
+    void SetSourceVolumeXcenter(G4double value);
+    void SetSourceVolumeYcenter(G4double value);
     void SetSourceVolumeZcenter(G4double value);
 
   public:
@@ -63,6 +65,8 @@ class PrimaryGenerator : public G4VPrimaryGenerator
     G4double daughterExcitEnergy;
     G4double sourceVolumeRadius;
     G4double sourceVolumeThickness;
+    G4double sourceVolumeXcenter;
+    G4double sourceVolumeYcenter;
     G4double sourceVolumeZcenter;
 };
 

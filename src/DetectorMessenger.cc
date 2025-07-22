@@ -57,6 +57,14 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* Det)
   fHPGeDimensionsCmd = new G4UIcmdWithAString("/geometry/setup/place",this);
   fHPGeDimensionsCmd->SetGuidance("specify dimensions of generic HPGe. They will be recognezed by name. Parameters: crystal_diameter/mm crystal_length/mm distance_crystal_cryostat_outside/mm cryostat_thickness/mm cryostat_diameter/mm cryostat_length");
   fHPGeDimensionsCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  fAsLayerThicknessCmd = new G4UIcmdWithADoubleAndUnit("/geometry/setup/AsLayerThickness",this);
+  fAsLayerThicknessCmd->SetGuidance("specify the thickness of the As layer in sample 3.");
+  fAsLayerThicknessCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  fAsCoverThicknessCmd = new G4UIcmdWithADoubleAndUnit("/geometry/setup/AsCoverThickness",this);
+  fAsCoverThicknessCmd->SetGuidance("specify the thickness of the cover around the As layer in sample 3.");
+  fAsCoverThicknessCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -95,6 +103,18 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
       G4double cryostat_diameter = StoD(next());
       G4double cryostat_length = StoD(next());
       fDetectorConstruction->SetGenericHPGeDimensions(crystal_diameter, crystal_length, distance_crystal_cryostat_outside, cryostat_thickness, cryostat_diameter, cryostat_length);
+  }
+  if (command == fAsLayerThicknessCmd)
+  {
+      // Extract As layer thickness
+      G4double As_layer_thickness = fAsLayerThicknessCmd->GetNewDoubleValue(newValue);
+      fDetectorConstruction->SetAsLayerThickness(As_layer_thickness);
+  }
+  if (command == fAsCoverThicknessCmd)
+  {
+      // Extract As cover thickness
+      G4double As_cover_thickness = fAsCoverThicknessCmd->GetNewDoubleValue(newValue);
+      fDetectorConstruction->SetAsCoverThickness(As_cover_thickness);
   }
 }
 

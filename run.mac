@@ -1,57 +1,17 @@
 /control/verbose 2
 /run/verbose 0
 #
-# Source inside borehole detector, SDD above
-#/geometry/setup/TU2 X 0 0 0 39
-#/geometry/setup/TU5 X 180 0 0 39
-
-# TU4+TU5 test setup
-/geometry/setup/place TU4 Y -90 17.9 0 0
-/geometry/setup/place TU5 X 0 0 0 -3.0
-/geometry/setup/place sample1 X 0 0 0 0
-/primary/sourceVolumeZcenter 0
+# TU2+TU3 EC0 setups
+/geometry/setup/place TU2 X 0 0 0 0
+/geometry/setup/place TU3 X 180 0 0 26.0
+/geometry/setup/place sample1 X 180 0 0 20.1
+/primary/sourceVolumeZcenter 20.1
 /primary/sourceVolumeThickness 0.137
 /primary/sourceVolumeRadius 11
-
-# Scintillator anti-coincidence setup
-#/geometry/setup/place Scint X 0 0 0 0
-#/geometry/setup/place TU4 X 0 0 0 -11
-#/geometry/setup/place TU2 X 180 0 0 11
-#/geometry/setup/place sample2 X 0 0 0 -2.5
-
-# Generic detector setup
-#/geometry/setup/place GenericHPGe X 0 0 0 0
-#/geometry/setup/place sample2 X 0 0 0 1
-##/geometry/setup/place sample2 X 180 0 0 5
-#/geometry/setup/place TU3 X 180 0 0 9
-#/primary/sourceVolumeZcenter 1
-##/primary/sourceVolumeZcenter 5
-#/primary/sourceVolumeThickness 0.137
-#/primary/sourceVolumeRadius 11
-
-# TU5 calibration setup
-#/geometry/setup/place TU5 X 0 0 0 0
-#/primary/sourceVolumeZcenter 10
-
-# TU2+TU3
-#/geometry/setup/place GenericHPGe X 0 0 0 0
-#/geometry/setup/place sample2 X 0 0 0 1
-##/geometry/setup/place sample2 X 180 0 0 5
-#/geometry/setup/place TU3 X 180 0 0 6
-#/primary/sourceVolumeZcenter 1
-#/primary/sourceVolumeThickness 0.137
-#/primary/sourceVolumeRadius 11
-
 #
-#/primary/ion 11 22
-#/primary/ion 55 137
-#/primary/ion 27 57
-#/primary/ion 56 133
-#/primary/ion 33 73
-#/primary/ion 33 74
 /primary/ion 33 76
-/primary/ECbranching 1.0
-/primary/daughterExcitEnergy 562.93 keV
+/primary/ECbranching 0.0
+#/primary/daughterExcitEnergy 562.93 keV
 #
 /process/em/fluo true
 #/process/em/auger true
@@ -59,9 +19,9 @@
 #/process/em/pixe true
 /run/initialize
 #
-/histo/file results/2023TU4TU5_EC_1E7.root
-/random/setSeeds 87156 18753
+/histo/file results/TU2eff_20mm.root
+/random/setSeeds 29185 57387
 #
 /run/printProgress 100000
 #
-/run/beamOn 10000000
+/run/beamOn 1000000
