@@ -92,8 +92,10 @@ void PrimaryGenerator::GeneratePrimaryVertex(G4Event* event)
   //vertex position
   G4double Phi = CLHEP::RandFlat::shoot(0.0, 2.0*M_PI);     // phi uniform
   G4double R = sqrt(CLHEP::RandFlat::shoot(0.0, 1.0)) * sourceVolumeRadius; // radius linear
+  G4double X = sourceVolumeXcenter + R*cos(Phi);
+  G4double Y = sourceVolumeYcenter + R*sin(Phi);
   G4double Z = sourceVolumeZcenter - 0.5*sourceVolumeThickness + CLHEP::RandFlat::shoot(0.0, sourceVolumeThickness);
-  G4ThreeVector position(R*cos(Phi)*CLHEP::mm, R*sin(Phi)*CLHEP::mm, Z*CLHEP::mm);
+  G4ThreeVector position(X*CLHEP::mm, Y*CLHEP::mm, Z*CLHEP::mm);
   //G4cout << sourceVolumeZcenter << "\t" << sourceVolumeThickness << "\t" << sourceVolumeRadius << "\t" << Z << "\t" << R << G4endl;
   
   // randomly choose original ion or hand-made EC according to branching ratio

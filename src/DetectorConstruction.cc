@@ -132,6 +132,7 @@ void DetectorConstruction::BuildMaterials()
   mat["EJ260"] = new G4Material("EJ260", 1.023*g/cm3, 2, kStateSolid);
   mat["EJ260"]->AddElement(C, 9);
   mat["EJ260"]->AddElement(H, 11);
+  mat["vacuum"] = nist->FindOrBuildMaterial("G4_Galactic");
 
   //G4Ele
   //TODO: peltier, tantalum collimator
@@ -207,21 +208,26 @@ void DetectorConstruction::ConstructTU5Detector(G4LogicalVolume* mother_logical,
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
-// Construct the TU3 SDD X-ray detector,
-// with frontent point at given frontend_position and given rotation.
-// frontend point := intersection of sensor rotation axis with front layer of housing
+// Construct the TU3 SDD X-ray detector.
+// Placement reference point is the center of the Be entrance window front.
 {
+  // From technical drawing: 
+  // Housing: outer diameter 21mm, radial thickness 0.27mm, front thickness 0.33mm, opening diameter 14mm, total length 9.2mm.
+  // Vacuum: z 8.1mm
+  // Collimator: z 0.42mm, inner diameter 10mm, outer diameter 15.1mm
+  // Backing: diameter 15.0mm, z 0.45mm
+
   // Si sensitive part
-  G4double sens_depth = 2.0*mm; // distance between front layer of enrance window and front layer of Si sensor; tuned to match efficiency at 1cm
+  G4double sens_depth = 2.0*mm; // distance between front layer of enrance window and front layer of Si sensor
   G4double sens_dz = 0.45*mm;
   G4double sens_rmin = 0.0*mm;
-  G4double sens_rmax = 5.046*mm; // area = 80mm^2 = pi*r^2
+  G4double sens_rmax = 7.5*mm;//5.890*mm; // area = 109mm^2. 
   G4double sens_sphi = 0.0;
   G4double sens_dphi = 2.0*M_PI;
   G4Transform3D sens_internal_rotate = G4Rotate3D();
   G4Transform3D sens_internal_translate = G4Translate3D(0.0, 0.0, -sens_depth-0.5*sens_dz);
   G4Transform3D sens_total_transform = global_transform*sens_internal_translate*sens_internal_rotate;
-
+  
   // Be entrance window
   G4double window_dz = 0.025*mm;
   G4double window_rmin = sens_rmin;
@@ -229,9 +235,64 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
   G4double window_sphi = sens_sphi;
   G4double window_dphi = sens_dphi;
   G4Transform3D window_internal_rotate = G4Rotate3D();
-  G4Transform3D window_internal_translate = G4Translate3D(0.0, 0.0, 0.5*window_dz);
+  G4Transform3D window_internal_translate = G4Translate3D(0.0, 0.0, -0.5*window_dz);
   G4Transform3D window_total_transform = global_transform*window_internal_translate*window_internal_rotate;
+  
+  // TODO: collimator.
+  G4double coll_rmin = 5.046*mm; // collimated area = 80mm^2 = pi*r^2
 
+  // Housing
+  G4double housing_length = 9.2*mm;
+  G4double housing_front_dz = 0.3*mm;
+  G4double housing_dr = 0.3*mm;
+  G4double housing_outer_diameter = 21.0*mm;
+  G4double housing_opening_diameter = 14.0*mm;
+  const int cap_num_planes = 4;
+  const G4double cap_z_plane[cap_num_planes] = {0.0,
+    -housing_front_dz,
+    -housing_front_dz,
+    -housing_length};
+  const G4double cap_inner_r[cap_num_planes] = {
+    housing_opening_diameter/2,
+    housing_opening_diameter/2,
+    housing_outer_diameter/2-housing_dr,
+    housing_outer_diameter/2-housing_dr};
+  const G4double cap_outer_r[cap_num_planes] = {
+    housing_outer_diameter/2,
+    housing_outer_diameter/2,
+    housing_outer_diameter/2,
+    housing_outer_diameter/2};
+  G4Transform3D cap_total_transform = global_transform;
+  G4Polycone* solidCap = new G4Polycone("solidCap", 0, 2*M_PI,
+    cap_num_planes, cap_z_plane, cap_inner_r, cap_outer_r);
+  G4LogicalVolume* logicCap = new G4LogicalVolume(
+    solidCap, mat["Al"], "logicCap");
+  G4VPhysicalVolume* physiCap = new G4PVPlacement(
+    cap_total_transform, logicCap, "physiCap", mother_logical, false, 0);
+
+  // Vacuum
+  G4double vac_z = 8.1*mm;
+  const int vac_num_planes = 4;
+  const G4double vac_z_plane[vac_num_planes] = {
+    -window_dz,
+    -housing_front_dz,
+    -housing_front_dz,
+    -vac_z};
+  const G4double vac_inner_r[vac_num_planes] = {
+    0, 0, 0, 0};
+  const G4double vac_outer_r[vac_num_planes] = {
+    housing_opening_diameter/2,
+    housing_opening_diameter/2,
+    housing_outer_diameter/2-housing_dr,
+    housing_outer_diameter/2-housing_dr};
+  G4Transform3D vac_total_transform = global_transform;
+  G4Polycone* solidVac = new G4Polycone("solidVac", 0, 2*M_PI,
+    vac_num_planes, vac_z_plane, vac_inner_r, vac_outer_r);
+  G4LogicalVolume* logicVac = new G4LogicalVolume(
+    solidVac, mat["vacuum"], "logicVac");
+  logicVac->SetVisAttributes(G4VisAttributes::GetInvisible());
+  G4VPhysicalVolume* physiVac = new G4PVPlacement(
+    vac_total_transform, logicVac, "physiVac", mother_logical, false, 0);
 
   // unique detector name
   G4String detectorName = "TU3";
@@ -239,7 +300,8 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
   G4Tubs* sens_solid = new G4Tubs("solidSDD", sens_rmin, sens_rmax, 0.5*sens_dz, sens_sphi, sens_dphi);
   G4LogicalVolume *sens_logical = new G4LogicalVolume(sens_solid, mat["Si"], "logic"+detectorName);
   sens_logical->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
-  new G4PVPlacement(sens_total_transform, sens_logical, "physiSDD", mother_logical, false, 0, checkOverlaps);
+  //new G4PVPlacement(sens_total_transform, sens_logical, "physiSDD", mother_logical, false, 0, checkOverlaps);
+  new G4PVPlacement(sens_internal_translate, sens_logical, "physiSDD", logicVac, false, 0, checkOverlaps);
   // register the sensitive logic volume name for sensitive detector
   AddDetectorName(detectorName);
 
@@ -577,7 +639,6 @@ void DetectorConstruction::ConstructAsContainer2(G4LogicalVolume* mother_logical
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-
 void DetectorConstruction::ConstructAsContainer3(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
 // Construct a proposed 3rd As sample holder fitting into TU2's borehole.
 // A layer of As2O3 surrounded by varying thickness of varying material.
@@ -608,6 +669,34 @@ void DetectorConstruction::ConstructAsContainer3(G4LogicalVolume* mother_logical
   G4Transform3D As_internal_translate = G4Translate3D(0.0, 0.0, -AsCoverThickness/2 - AsLayerThickness/2);
   G4VPhysicalVolume* physiSample = new G4PVPlacement(
     As_internal_translate, logicSample, "physiSample", logicCont, false, 0);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::ConstructPTBstandard(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+// Construct a PTB standard. 
+// Two layers of (21.3 +- 1.8) mg/cm^2 polyethylene with 26 mm diameter.
+// An Al ring with thickness 3 mm , inner diameter 26 mm and outer diameter 30 mm.
+// Central point equals the geometrical center which is the central point of the radioactive substance.
+{
+  G4double PTBfoil_total_r = 13.0*mm;
+  G4double PTBfoil_total_z = 2*0.021/0.94*mm; // PE density as implemented in G4 is 0.94 g/cm^3
+  G4double PTBring_outer_r = 15.0*mm;
+  G4double PTBring_total_z = 3.0*mm;
+
+  // construct the PE foils
+  G4Tubs* solidPTBfoil = new G4Tubs("solidPTBfoil", 0, PTBfoil_total_r, PTBfoil_total_z/2, 0.0, 2*M_PI);
+  G4LogicalVolume* logicPTBfoil = new G4LogicalVolume(
+    solidPTBfoil, mat["polycarbonate"], "logicPTBfoil");
+  G4VPhysicalVolume* physiPTBfoil = new G4PVPlacement(
+    global_transform, logicPTBfoil, "physiPTBfoil", mother_logical, false, 0);
+  
+  // construct the Al ring
+  G4Tubs* solidPTBring = new G4Tubs("solidPTBring", PTBfoil_total_r, PTBring_outer_r, PTBring_total_z/2, 0.0, 2*M_PI);
+  G4LogicalVolume* logicPTBring = new G4LogicalVolume(
+    solidPTBring, mat["polycarbonate"], "logicPTBring");
+  G4VPhysicalVolume* physiPTBring = new G4PVPlacement(
+    global_transform, logicPTBring, "physiPTBring", mother_logical, false, 0);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -659,6 +748,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     if (name == "sample1") ConstructAsContainer1(logicWorld, trans);
     if (name == "sample2") ConstructAsContainer2(logicWorld, trans);
     if (name == "sample3") ConstructAsContainer3(logicWorld, trans);
+    if (name == "PTBstandard") ConstructPTBstandard(logicWorld, trans);
   }
 
   //
