@@ -46,6 +46,7 @@ class PrimaryGenerator : public G4VPrimaryGenerator
   public:
     PrimaryGenerator();    
     ~PrimaryGenerator();
+    void SetGammaEnergy(G4double gamma_energy);
     void SetIonZandA(G4int Z, G4int A);
     void SetECbranching(G4double branching);
     void SetDaughterExcitEnergy(G4double excitEnergy);
@@ -60,6 +61,7 @@ class PrimaryGenerator : public G4VPrimaryGenerator
     virtual void GeneratePrimaryVertex(G4Event*);
 
   private:
+    G4double gammaEnergy;
     G4int ionZ, ionA;
     G4double ECbranching;
     G4double daughterExcitEnergy;

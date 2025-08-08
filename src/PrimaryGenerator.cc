@@ -53,6 +53,7 @@ PrimaryGenerator::PrimaryGenerator()
     primaryMessenger = new PrimaryMessenger(this);
 
     // Primary particle standard values
+    gammaEnergy = 0;
     ionZ = 33;
     ionA = 76;
     ECbranching = 0.0;
@@ -71,10 +72,16 @@ PrimaryGenerator::~PrimaryGenerator()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+void PrimaryGenerator::SetGammaEnergy(G4double gamma_energy)
+{
+  gammaEnergy = gamma_energy;
+  G4cout << gamma_energy / CLHEP::keV << " keV gamma" << G4endl;
+}
 void PrimaryGenerator::SetIonZandA(G4int Z, G4int A)
 {
   ionZ = Z;
   ionA = A;
+  gammaEnergy = 0;
 }
 void PrimaryGenerator::SetECbranching(G4double branching)
 {
@@ -97,7 +104,24 @@ void PrimaryGenerator::GeneratePrimaryVertex(G4Event* event)
   G4double Z = sourceVolumeZcenter - 0.5*sourceVolumeThickness + CLHEP::RandFlat::shoot(0.0, sourceVolumeThickness);
   G4ThreeVector position(X*CLHEP::mm, Y*CLHEP::mm, Z*CLHEP::mm);
   //G4cout << sourceVolumeZcenter << "\t" << sourceVolumeThickness << "\t" << sourceVolumeRadius << "\t" << Z << "\t" << R << G4endl;
-  
+
+  if (gammaEnergy > 0)
+  /// Single gamma in uniform direction
+  {
+    G4PrimaryVertex* vertexA = new G4PrimaryVertex(position, 0.0*s);
+    G4ParticleDefinition* theGamma = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
+    G4PrimaryParticle* particle1 = new G4PrimaryParticle(theGamma);
+    // uniform direction
+    G4double phi = CLHEP::RandFlat::shoot(0.0, 2.0*M_PI);     // phi uniform
+    G4double theta = acos(CLHEP::RandFlat::shoot(-1.0, 1.0)); // theta sine distributed
+    particle1->SetMomentumDirection(G4ThreeVector(sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)));
+    particle1->SetKineticEnergy(gammaEnergy);
+    //
+    vertexA->SetPrimary(particle1);
+    event->AddPrimaryVertex(vertexA);
+    return;
+  }
+
   // randomly choose original ion or hand-made EC according to branching ratio
   G4double random_number = CLHEP::RandFlat::shoot(0.0, 1.0);
   if (random_number > ECbranching)

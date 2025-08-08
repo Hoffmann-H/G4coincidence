@@ -118,6 +118,7 @@ void DetectorConstruction::BuildMaterials()
   mat["air"] = nist->FindOrBuildMaterial("G4_AIR");
   mat["Pb"] = nist->FindOrBuildMaterial("G4_Pb");
   mat["Cu"] = nist->FindOrBuildMaterial("G4_Cu");
+  mat["Ta"] = nist->FindOrBuildMaterial("G4_Ta");
   mat["concrete"] = nist->FindOrBuildMaterial("G4_CONCRETE");
   mat["PMMA"] = nist->FindOrBuildMaterial("G4_PLEXIGLASS");
   mat["polycarbonate"] = nist->FindOrBuildMaterial("G4_POLYCARBONATE");
@@ -216,22 +217,27 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
   // Vacuum: z 8.1mm
   // Collimator: z 0.42mm, inner diameter 10mm, outer diameter 15.1mm
   // Backing: diameter 15.0mm, z 0.45mm
+  // Steffen 7.5.2022: Auf Nachfrage bei Ketek sagte man mir, dass der verbaute On-Chip Multilayer Kollimator zum Großteil aus Tantal bestünde (Siehe “Ketek_Kollimator”-Bild im Anhang)
+  // Picture "KETEK multi-layer collimator": outside Al-Ti-Cr-Ta inside
 
-  // Si sensitive part
+  // Si crystal
   G4double sens_depth = 2.0*mm; // distance between front layer of enrance window and front layer of Si sensor
-  G4double sens_dz = 0.45*mm;
+  G4double sens_dz = 0.450*mm;
   G4double sens_rmin = 0.0*mm;
   G4double sens_rmax = 7.5*mm;//5.890*mm; // area = 109mm^2. 
   G4double sens_sphi = 0.0;
   G4double sens_dphi = 2.0*M_PI;
-  G4Transform3D sens_internal_rotate = G4Rotate3D();
-  G4Transform3D sens_internal_translate = G4Translate3D(0.0, 0.0, -sens_depth-0.5*sens_dz);
-  G4Transform3D sens_total_transform = global_transform*sens_internal_translate*sens_internal_rotate;
+  G4Transform3D Si_internal_translate = G4Translate3D(0.0, 0.0, -sens_depth-0.5*sens_dz);
+  // Si sensitive part - to be tuned
+  G4double sens_rsens = 5.0*mm;
+  G4double sens_dead_front = 0.001*mm;
+  G4double sens_dead_back = 0.001*mm;
+  G4Transform3D sens_internal_translate = G4Translate3D(0.0, 0.0, 0.5*(sens_dead_back-sens_dead_front));
   
   // Be entrance window
   G4double window_dz = 0.025*mm;
   G4double window_rmin = sens_rmin;
-  G4double window_rmax = 10.*mm;
+  G4double window_rmax = 7.*mm;
   G4double window_sphi = sens_sphi;
   G4double window_dphi = sens_dphi;
   G4Transform3D window_internal_rotate = G4Rotate3D();
@@ -239,14 +245,21 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
   G4Transform3D window_total_transform = global_transform*window_internal_translate*window_internal_rotate;
   
   // TODO: collimator.
-  G4double coll_rmin = 5.046*mm; // collimated area = 80mm^2 = pi*r^2
+  //G4double coll_rmin = 5.046*mm; // collimated area = 80mm^2 = pi*r^2 => r = 5.046mm
+  //G4double coll_rmin = 1.7933617; // tuned to match experimental efficiency for 14keV gammas @50mm
+  G4double coll_rmin = 5.0*mm; // from technical drawing
+  G4double coll_dz = 0.42*mm;
+  G4double coll_rmax = 7.55*mm;
+  G4double coll_sphi = sens_sphi;
+  G4double coll_dphi = sens_dphi;
+  G4Transform3D coll_internal_translate = G4Translate3D(0.0, 0.0, -sens_depth+0.5*coll_dz);
 
   // Housing
   G4double housing_length = 9.2*mm;
   G4double housing_front_dz = 0.3*mm;
   G4double housing_dr = 0.3*mm;
   G4double housing_outer_diameter = 21.0*mm;
-  G4double housing_opening_diameter = 14.0*mm;
+  G4double housing_opening_diameter = 2*window_rmax;
   const int cap_num_planes = 4;
   const G4double cap_z_plane[cap_num_planes] = {0.0,
     -housing_front_dz,
@@ -294,20 +307,28 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
   G4VPhysicalVolume* physiVac = new G4PVPlacement(
     vac_total_transform, logicVac, "physiVac", mother_logical, false, 0);
 
+  // construct Si crystal
+  G4Tubs* Si_solid = new G4Tubs("solidSi", sens_rmin, sens_rmax, 0.5*sens_dz, sens_sphi, sens_dphi);
+  G4LogicalVolume *Si_logical = new G4LogicalVolume(Si_solid, mat["Si"], "logicSi");
+  Si_logical->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 1.0, 0.0)));
+  new G4PVPlacement(Si_internal_translate, Si_logical, "physiSi", logicVac, false, 0, checkOverlaps);
   // unique detector name
   G4String detectorName = "TU3";
   // construct sensitive part
-  G4Tubs* sens_solid = new G4Tubs("solidSDD", sens_rmin, sens_rmax, 0.5*sens_dz, sens_sphi, sens_dphi);
+  G4Tubs* sens_solid = new G4Tubs("solidSDD", sens_rmin, sens_rsens, 0.5*(sens_dz-sens_dead_front-sens_dead_back), sens_sphi, sens_dphi);
   G4LogicalVolume *sens_logical = new G4LogicalVolume(sens_solid, mat["Si"], "logic"+detectorName);
   sens_logical->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
-  //new G4PVPlacement(sens_total_transform, sens_logical, "physiSDD", mother_logical, false, 0, checkOverlaps);
-  new G4PVPlacement(sens_internal_translate, sens_logical, "physiSDD", logicVac, false, 0, checkOverlaps);
+  new G4PVPlacement(sens_internal_translate, sens_logical, "physiSDD", Si_logical, false, 0, checkOverlaps);
   // register the sensitive logic volume name for sensitive detector
   AddDetectorName(detectorName);
 
   G4Tubs* window_solid = new G4Tubs("solidBeWindow", window_rmin, window_rmax, 0.5*window_dz, window_sphi, window_dphi);
   G4LogicalVolume *window_logical = new G4LogicalVolume(window_solid, mat["Be"], "logicBeWindow");
   new G4PVPlacement(window_total_transform, window_logical, "physiBeWindow", mother_logical, false, 0, checkOverlaps);
+
+  G4Tubs* coll_solid = new G4Tubs("solidOnChipCollimator", coll_rmin, coll_rmax, 0.5*coll_dz, coll_sphi, coll_dphi);
+  G4LogicalVolume* coll_logical = new G4LogicalVolume(coll_solid, mat["Ta"], "logicalOnChipCollimator");
+  new G4PVPlacement(coll_internal_translate, coll_logical, "physiOnChipCollimator", logicVac, false, 0, checkOverlaps);
 }
 
 void DetectorConstruction::ConstructTU4Detector(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)

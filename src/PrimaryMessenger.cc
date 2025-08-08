@@ -50,6 +50,10 @@ PrimaryMessenger::PrimaryMessenger(PrimaryGenerator* Primary)
   fPrimaryDir = new G4UIdirectory("/primary/");
   fPrimaryDir->SetGuidance("Primary particle settings");
 
+  fGammaCmd = new G4UIcmdWithADoubleAndUnit("/primary/gamma",this);
+  fGammaCmd->SetGuidance("set primary particle a gamma wwith given energy");
+  fGammaCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
   fPrimaryIonCmd = new G4UIcmdWithAString("/primary/ion",this);
   fPrimaryIonCmd->SetGuidance("define Z and A of primary ion");
   fPrimaryIonCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
@@ -101,6 +105,10 @@ PrimaryMessenger::~PrimaryMessenger()
 
 void PrimaryMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 { // Given arguments will be found in the newValue string, otherwise it is empty.
+  if (command == fGammaCmd)
+  {
+      fPrimary->SetGammaEnergy(fGammaCmd->GetNewDoubleValue(newValue));
+  }
   if (command == fPrimaryIonCmd)
   {
       // Extract two integers following examples/advanced/underground_physics/src/DMXParticleSourceMessenger.cc

@@ -61,6 +61,7 @@ class PrimaryMessenger: public G4UImessenger
     PrimaryGenerator*            fPrimary;
     
     G4UIdirectory*               fPrimaryDir;
+    G4UIcmdWithADoubleAndUnit*   fGammaCmd;
     G4UIcmdWithAString*          fPrimaryIonCmd;
     G4UIcmdWithADouble*          fPrimaryECbranchingCmd;
     G4UIcmdWithADoubleAndUnit*   fDaughterExcitEnergyCmd;

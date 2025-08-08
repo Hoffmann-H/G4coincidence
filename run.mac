@@ -6,7 +6,7 @@
 /geometry/setup/place TU3 X 180 0 0 57.5
 /geometry/setup/place PTBstandard X 0 0 0 7.5
 /primary/sourceVolumeZcenter 7.5
-/primary/sourceVolumeYcenter 16
+/primary/sourceVolumeYcenter 0
 /primary/sourceVolumeRadius 2.5
 # TU2 calibration setups
 #/geometry/setup/place TU2 X 0 0 0 0
@@ -14,14 +14,14 @@
 #/primary/sourceVolumeZcenter 2.5
 #/primary/sourceVolumeRadius 2.5
 #
-#/primary/ion 56 133 # Ba-133
+/primary/ion 56 133 # Ba-133
 #/primary/ion 30 65 # Zn-65
 #/primary/ion 27 57 # Co-57
 #/primary/ion 55 137 # Cs-137
 #/primary/ion 39 88 # Y-88
 #/primary/ion 27 60 # Co-60
 #/primary/ion 11 22 # Na-22
-/primary/particle gamma
+#/primary/gamma 14 keV
 /primary/ECbranching 0.0
 #
 /process/had/deex/correlatedGamma true # Switch on angular correlations
@@ -31,9 +31,9 @@
 /process/em/pixe true
 /run/initialize
 #
-/histo/file results/TU3v1_ang_16mm_1E7.root
-/random/setSeeds 29185 57387
+/histo/file results/TU3v8_As45_133Ba_1E8.root
+/random/setSeeds 61519 87615
 #
 /run/printProgress 1000000
 #
-/run/beamOn 10000000
+/run/beamOn 100000000
