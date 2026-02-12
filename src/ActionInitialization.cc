@@ -33,6 +33,7 @@
 #include "DetectorConstruction.hh"
 #include "RunAction.hh"
 #include "EventAction.hh"
+#include "TrackingAction.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -60,6 +61,9 @@ void ActionInitialization::Build() const
 
   EventAction* eventAction = new EventAction(histoMan, detCon);
   SetUserAction(eventAction);
+
+  TrackingAction* trackingAction = new TrackingAction(histoMan);
+  SetUserAction(trackingAction);
 }  
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

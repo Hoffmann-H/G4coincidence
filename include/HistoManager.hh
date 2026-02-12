@@ -56,6 +56,7 @@ class HistoManager
     void Book();
     void SetEdep(G4int det, G4double edep);
     void Fill();
+    void Track(G4double kineticEnergy);
     void SaveFile();
     void CloseFile();
     void SetResultsFile(G4String filename);
@@ -70,6 +71,8 @@ class HistoManager
     G4double HPGeEdep[5]; // hard-coded max number of detectors. Can be changed into vector
     //TH1F* pH1Edep;
     TTree* pEvtTree;
+    Double_t Ekin;
+    TTree* pTrkTree;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

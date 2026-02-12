@@ -71,6 +71,8 @@ void HistoManager::Book()
     G4cout << "HistoManager knows detector " << name << G4endl;
     pEvtTree->Branch(name.c_str(), &(HPGeEdep[i]));
   }
+  pTrkTree = new TTree("tTrk", "track tree");
+  pTrkTree->Branch("Ekin", &Ekin);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -93,12 +95,21 @@ void HistoManager::Fill()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+void HistoManager::Track(G4double kineticEnergy)
+{
+  Ekin = kineticEnergy;
+  pTrkTree->Fill();
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 void HistoManager::SaveFile()
 {
   TFile* f = TFile::Open(fResFilename.c_str(), "UPDATE");
   //if (fDoWriteHisto) pH1Edep->Write("", TObject::kOverwrite);
   //if (fDoWriteTree) 
   pEvtTree->Write("", TObject::kOverwrite);
+  pTrkTree->Write("", TObject::kOverwrite);
   f->Save();
   f->Close();
   G4cout << "Save file" << G4endl;

@@ -37,12 +37,14 @@
 #include "globals.hh"
 #include "G4Transform3D.hh"
 #include <map>
+#include "G4Colour.hh"
 
 class DetectorMessenger;
 //class EventAction;
 class G4VPhysicalVolume;
 class G4LogicalVolume;
 class G4Material;
+//class G4Colour;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -87,6 +89,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void ConstructAsContainer2(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructAsContainer3(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructPTBstandard(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
+    void ConstructCopperHolder(G4LogicalVolume* mother_logical, G4Transform3D& global_transform);
     void ConstructGenericHPGe(G4LogicalVolume* mother_logical, G4Transform3D& global_transform, G4int generic_HPGe_index);
 
     HPGeDimensions genericHPGeDimensions;
@@ -103,6 +106,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4bool checkOverlaps;
     G4double fWorldSize;
     std::map<G4String,G4Material*> mat;
+
+  /// Visualization ad-hoc stuff...
+  public:
+    // Optional hard-coded angles, just for visualization
+    G4double sphi = 0.0;
+    G4double dphi = 1.0*M_PI;
+    G4Colour housing_gray;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

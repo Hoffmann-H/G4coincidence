@@ -150,24 +150,25 @@ void PrimaryGenerator::GeneratePrimaryVertex(G4Event* event)
     // Vertex position
     G4double timeB = 0.0*s;
     G4PrimaryVertex* vertexB = new G4PrimaryVertex(position, timeB);
+    G4double phi, theta;
     
     // Particles 2 and 3 at vertex B - EC X-rays and excited doughter nucleus
     // Add gamma by hand
     G4ParticleDefinition* photon
       = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
-    G4PrimaryParticle* particle2 = new G4PrimaryParticle(photon);
-    // random direction (isotropic)
-    G4double phi = CLHEP::RandFlat::shoot(0.0, 2.0*M_PI);     // phi uniform
-    G4double theta = acos(CLHEP::RandFlat::shoot(-1.0, 1.0)); // theta sine distributed
-    particle2->SetMomentumDirection(G4ThreeVector(sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)));    
-    particle2->SetKineticEnergy(daughterExcitEnergy);
+    //G4PrimaryParticle* particle2 = new G4PrimaryParticle(photon);
+    //// random direction (isotropic)
+    //phi = CLHEP::RandFlat::shoot(0.0, 2.0*M_PI);     // phi uniform
+    //theta = acos(CLHEP::RandFlat::shoot(-1.0, 1.0)); // theta sine distributed
+    //particle2->SetMomentumDirection(G4ThreeVector(sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)));    
+    //particle2->SetKineticEnergy(daughterExcitEnergy);
     // Getting ion from ion table
-    //G4double ionCharge   = 0.*eplus;
-    //G4double excitEnergy = daughterExcitEnergy;
-    //G4ParticleDefinition* theIon
-    //    = G4IonTable::GetIonTable()->GetIon(ionZ-1,ionA,excitEnergy);
-    //G4PrimaryParticle* particle2 = new G4PrimaryParticle(theIon);
-    //particle2->SetKineticEnergy(0.0);
+    G4double ionCharge   = 0.*eplus;
+    G4double excitEnergy = daughterExcitEnergy;
+    G4ParticleDefinition* theIon
+        = G4IonTable::GetIonTable()->GetIon(ionZ-1,ionA,excitEnergy);
+    G4PrimaryParticle* particle2 = new G4PrimaryParticle(theIon);
+    particle2->SetKineticEnergy(0.0);
 
     // Add X-ray by hand
     G4PrimaryParticle* particle3 = new G4PrimaryParticle(photon);
