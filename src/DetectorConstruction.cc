@@ -136,6 +136,9 @@ void DetectorConstruction::BuildMaterials()
   mat["As2O3"]->AddElement(O, 3);
   G4Element* C = nist->FindOrBuildElement(6);
   G4Element* H = nist->FindOrBuildElement(1);
+  mat["EJ200"] = new G4Material("EJ200", 1.023*g/cm3, 2, kStateSolid);
+  mat["EJ200"]->AddElement(C, 9);
+  mat["EJ200"]->AddElement(H, 10);
   mat["EJ260"] = new G4Material("EJ260", 1.023*g/cm3, 2, kStateSolid);
   mat["EJ260"]->AddElement(C, 9);
   mat["EJ260"]->AddElement(H, 11);
@@ -578,6 +581,34 @@ void DetectorConstruction::ConstructScintillator(G4LogicalVolume* mother_logical
   AddDetectorName(detectorName);
 }
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::ConstructGenericScint(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+// Construct a generic scintillator detector. 
+// Shape: cylinder
+// Dimensions so far hard coded. Could be implemented in commands.
+{
+  G4double scint_z = 5.0*mm;
+  G4double scint_rmin = 0;
+  G4double scint_rmax = 15.0*mm;
+
+  // unique detector name
+  G4String detectorName = "GenSc";
+  // construct sensitive part
+  G4Tubs* solidScint = new G4Tubs("solidGenSc",
+    scint_rmin, scint_rmax, scint_z/2, 0, 2*M_PI);
+    
+  G4LogicalVolume* logicScint = new G4LogicalVolume(
+    solidScint, mat["EJ200"], "logic"+detectorName);
+  logicScint->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
+  G4VPhysicalVolume* physiScint = new G4PVPlacement(
+    global_transform, logicScint, "physiScint", mother_logical, false, 0);
+  // register the sensitive logic volume name for sensitive detector
+  AddDetectorName(detectorName);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 void DetectorConstruction::ConstructGenericHPGe(G4LogicalVolume* mother_logical, G4Transform3D& global_transform, G4int generic_HPGe_index)
 {
     G4cout << "DEBUG: Construct HPGe detector " << generic_HPGe_index << " with dimensions: " << G4endl
@@ -651,6 +682,7 @@ void DetectorConstruction::ConstructGenericHPGe(G4LogicalVolume* mother_logical,
     G4VPhysicalVolume* physiCap = new G4PVPlacement(
       cap_total_transform, logicCap, "physiCap", mother_logical, false, 0);
 }
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DetectorConstruction::ConstructAsContainer1(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
@@ -859,6 +891,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     if (name == "TU4") ConstructTU4Detector(logicWorld, trans);
     if (name == "TU5") ConstructTU5Detector(logicWorld, trans);
     if (name == "Scint") ConstructScintillator(logicWorld, trans);
+    if (name == "GenSc") ConstructGenericScint(logicWorld, trans);
     if (name == "GenericHPGe") {
         ConstructGenericHPGe(logicWorld, trans, generic_HPGe_index);
         generic_HPGe_index++;
