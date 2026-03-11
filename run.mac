@@ -1,6 +1,14 @@
 /control/verbose 2
 /run/verbose 0
 #
+# EC0 generic scintillator setup
+#/geometry/setup/place TU3 Y 180 0 0 5.0
+#/geometry/setup/place GenSc Y 0 0 0 0
+#/geometry/setup/place sample1 Y 180 0 0 -5.0
+#/primary/sourceVolumeRadius 11
+#/primary/sourceVolumeThickness 0.137
+#/primary/sourceVolumeZcenter -5.0
+#
 # TU3 calibration setups
 #/geometry/setup/place TU2 X 0 0 0 0
 #/geometry/setup/place TU3 X 180 0 0 57.5
@@ -33,18 +41,18 @@
 #/primary/ion 11 22 # Na-22
 #/primary/gamma 10.5 keV
 /primary/ion 33 76 # As-76
-/primary/ECbranching 1.0
-/primary/daughterExcitEnergy 562.93 keV
+/primary/ECbranching 0.0
+#/primary/daughterExcitEnergy 562.93 keV
 #
 /process/had/deex/correlatedGamma true # Switch on angular correlations
 /process/em/fluo true
-/process/em/auger true
-/process/em/augerCascade true
-/process/em/pixe true
+#/process/em/auger true
+#/process/em/augerCascade true
+#/process/em/pixe true
 /run/initialize
 #
-/histo/file results/TU3v11_04As_EC_1E7.root
-/random/setSeeds 22449 74322
+/histo/file results/As_beta_TU2v04_TU3v11_1E6.root
+/random/setSeeds 26049 84325
 #
 /run/printProgress 1000000
-/run/beamOn 10000000
+/run/beamOn 1000000
