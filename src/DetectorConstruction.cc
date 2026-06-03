@@ -142,6 +142,9 @@ void DetectorConstruction::BuildMaterials()
   mat["EJ260"] = new G4Material("EJ260", 1.023*g/cm3, 2, kStateSolid);
   mat["EJ260"]->AddElement(C, 9);
   mat["EJ260"]->AddElement(H, 11);
+  mat["benzene"] = new G4Material("benzene", 0.8765*g/cm3, 2, kStateLiquid);
+  mat["benzene"]->AddElement(C, 6);
+  mat["benzene"]->AddElement(H, 6);
   mat["vacuum"] = nist->FindOrBuildMaterial("G4_Galactic");
 
   //G4Ele
@@ -238,7 +241,7 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
   G4double sens_dphi = dphi;
   G4Transform3D Si_internal_translate = G4Translate3D(0.0, 0.0, -sens_depth-0.5*sens_dz);
   // Si sensitive part - to be tuned
-  //G4double sens_rsens = 5.0*mm; // collimator inner radius from technical drawing
+  // G4double sens_rsens = 5.0*mm; // collimator inner radius from technical drawing
   G4double sens_rsens = 5.24*mm;
   G4double sens_dead_front = 0.008*mm;
   G4double sens_dead_back = 0.001*mm;
@@ -257,7 +260,7 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
   // TODO: collimator.
   //G4double coll_rmin = 5.046*mm; // collimated area = 80mm^2 = pi*r^2 => r = 5.046mm
   //G4double coll_rmin = 1.7933617; // tuned to match experimental efficiency for 14keV gammas @50mm
-  //G4double coll_rmin = 5.0*mm; // from technical drawing; consistent with nominal collimated area
+  // G4double coll_rmin = 5.0*mm; // from technical drawing; consistent with nominal collimated area
   G4double coll_rmin = 5.24*mm;
   G4double coll_dz = 0.42*mm;
   G4double coll_rmax = 7.55*mm;
@@ -448,7 +451,7 @@ void DetectorConstruction::ConstructTU2Detector(G4LogicalVolume* mother_logical,
   // Empirical HPGe properties
   distanceFromCapFront = 8 * mm;
   deadLayerFront = 1.0 * mm;
-  deadLayerOutside = 1.0 * mm;
+  deadLayerOutside = 3.0 * mm;
   deadLayerInside = 0.1 * mm;
   deadLayerBack = 1.0 * mm;
 
@@ -605,6 +608,53 @@ void DetectorConstruction::ConstructGenericScint(G4LogicalVolume* mother_logical
     global_transform, logicScint, "physiScint", mother_logical, false, 0);
   // register the sensitive logic volume name for sensitive detector
   AddDetectorName(detectorName);
+}
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::ConstructVetoScint(G4LogicalVolume* mother_logical, G4Transform3D& global_transform)
+// Construct a veto liquid scintillator detector. 
+// Shape: rotation body 
+// Dimensions so far hard coded. Could be implemented in commands.
+{
+  G4double scint_dz = 610.0*mm;
+  G4double scint_rmin = 0;
+  G4double scint_rmax = 610.0*mm;
+  G4double hole0_r = 13.0*mm;
+  G4double hole0_z = -7.0*mm;
+  G4double hole1_r = 48.0*mm;
+  G4double hole1_z = hole0_z + 105.0*mm;
+  G4double cont_d = 1.001*mm;
+
+  // unique detector name
+  G4String detectorName = "VetoSc";
+  // construct sensitive part
+  const int scint_num_planes = 6;
+  const G4double scint_z_plane[scint_num_planes] = {-scint_dz, hole0_z - cont_d, hole0_z - cont_d, hole1_z - cont_d, hole1_z - cont_d, scint_dz};
+  const G4double scint_inner_r[scint_num_planes] = {0, 0, hole0_r + cont_d, hole0_r + cont_d, hole1_r + cont_d, hole1_r + cont_d};
+  const G4double scint_outer_r[scint_num_planes] = {scint_dz, scint_dz, scint_dz, scint_dz, scint_dz, scint_dz};
+  G4Polycone* solidScint = new G4Polycone("solidVetoSc", 0, 2*M_PI,
+      scint_num_planes, scint_z_plane, scint_inner_r, scint_outer_r);    
+  G4LogicalVolume* logicScint = new G4LogicalVolume(
+    solidScint, mat["EJ200"], "logic"+detectorName);
+  logicScint->SetVisAttributes(new G4VisAttributes(G4Colour(1.0, 0.0, 0.0)));
+  G4VPhysicalVolume* physiScint = new G4PVPlacement(
+    global_transform, logicScint, "physiScint", mother_logical, false, 0);
+  // register the sensitive logic volume name for sensitive detector
+  AddDetectorName(detectorName);
+
+  // Construct a container for sample and detector
+  cont_d -= 0.001*mm;
+  const int cont_num_planes = 8;
+  const G4double cont_z_plane[cont_num_planes] = {hole0_z - cont_d, hole0_z, hole0_z, hole1_z - cont_d, hole1_z - cont_d, hole1_z, hole1_z, scint_dz};
+  const G4double cont_inner_r[cont_num_planes] = {0, 0, hole0_r, hole0_r, hole0_r, hole0_r, hole1_r, hole1_r};
+  const G4double cont_outer_r[cont_num_planes] = {hole0_r + cont_d, hole0_r + cont_d, hole0_r + cont_d, hole0_r + cont_d, hole1_r + cont_d, hole1_r + cont_d, hole1_r + cont_d, hole1_r + cont_d};
+  G4Polycone* solidCont = new G4Polycone("solidCont", 0, 2*M_PI,
+      cont_num_planes, cont_z_plane, cont_inner_r, cont_outer_r);    
+  G4LogicalVolume* logicCont = new G4LogicalVolume(
+    solidCont, mat["polycarbonate"], "logicCont");
+  logicCont->SetVisAttributes(new G4VisAttributes(G4Colour(0.75, 0.75, 0.75)));
+  G4VPhysicalVolume* physiCont = new G4PVPlacement(
+    global_transform, logicCont, "physiCont", mother_logical, false, 0);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -892,6 +942,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     if (name == "TU5") ConstructTU5Detector(logicWorld, trans);
     if (name == "Scint") ConstructScintillator(logicWorld, trans);
     if (name == "GenSc") ConstructGenericScint(logicWorld, trans);
+    if (name == "VetoSc") ConstructVetoScint(logicWorld, trans);
     if (name == "GenericHPGe") {
         ConstructGenericHPGe(logicWorld, trans, generic_HPGe_index);
         generic_HPGe_index++;
