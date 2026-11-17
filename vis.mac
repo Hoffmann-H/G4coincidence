@@ -57,16 +57,16 @@
 #/primary/sourceVolumeZcenter -5.0
 
 # EC0 gamma veto liquid scintilator setup
-/geometry/setup/place TU3 Y 180 0 0 5.0
-/geometry/setup/place VetoSc X 0 0 0 0
-/geometry/setup/place sample1 Y 180 0 0 0
-/primary/sourceVolumeRadius 11
-/primary/sourceVolumeThickness 0.137
-/primary/sourceVolumeZcenter 0
+#/geometry/setup/place TU3 Y 180 0 0 5.0
+#/geometry/setup/place VetoSc X 0 0 0 0
+#/geometry/setup/place sample1 Y 180 0 0 0
+#/primary/sourceVolumeRadius 11
+#/primary/sourceVolumeThickness 0.137
+#/primary/sourceVolumeZcenter 0
 
 # TU3 calibration setups
 #/geometry/setup/place TU2 X 0 0 0 0
-#/geometry/setup/place TU3 X 180 0 0 57.5
+#/geometry/setup/place TU3 X 180 0 0 7.5
 #/geometry/setup/place PTBstandard X 0 0 0 7.5
 #/primary/sourceVolumeZcenter 7.5
 #/primary/sourceVolumeYcenter 0
@@ -85,17 +85,19 @@
 # Actual TU2+TU3 As-setup
 #/geometry/setup/place TU2 Y 0 0 0 0
 #/geometry/setup/place TU3 Y 180 0 0 12.8
-#/geometry/setup/place sample1 Y 180 0 0 7
-#/primary/sourceVolumeRadius 11
-#/primary/sourceVolumeThickness 0.137
-#/primary/sourceVolumeZcenter 7
+/geometry/setup/place TU3 Y 180 0 0 9
+/geometry/setup/place sample1 Y 180 0 0 7
+/primary/sourceVolumeRadius 11
+/primary/sourceVolumeThickness 0.137
+/primary/sourceVolumeZcenter 7
 
 #/primary/ion 33 76
 #/primary/ion 56 133 # Ba-133
-#/primary/gamma 8 keV
-/primary/ion 33 76 # As-76
-/primary/ECbranching 1.0
-/primary/daughterExcitEnergy 562.93 keV
+#/primary/gamma 10.5 keV
+#/primary/ion 33 76 # As-76
+/primary/elec 0 keV
+/primary/ECbranching 0.0
+#/primary/daughterExcitEnergy 562.93 keV
 #
 /process/had/deex/correlatedGamma true # Switch on angular correlations
 /process/em/fluo true

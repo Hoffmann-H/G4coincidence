@@ -38,6 +38,7 @@
 
 class PrimaryMessenger;
 class G4Event;
+class TGraph;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -50,6 +51,7 @@ class PrimaryGenerator : public G4VPrimaryGenerator
     void SetIonZandA(G4int Z, G4int A);
     void SetECbranching(G4double branching);
     void SetDaughterExcitEnergy(G4double excitEnergy);
+    void SetElec(G4double energy);
     void SetSourceVolumeRadius(G4double value);
     void SetSourceVolumeThickness(G4double value);
     void SetSourceVolumeXcenter(G4double value);
@@ -65,11 +67,13 @@ class PrimaryGenerator : public G4VPrimaryGenerator
     G4int ionZ, ionA;
     G4double ECbranching;
     G4double daughterExcitEnergy;
+    G4double electronEnergy;
     G4double sourceVolumeRadius;
     G4double sourceVolumeThickness;
     G4double sourceVolumeXcenter;
     G4double sourceVolumeYcenter;
     G4double sourceVolumeZcenter;
+    TGraph* betaCum;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

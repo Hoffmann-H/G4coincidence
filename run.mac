@@ -10,12 +10,12 @@
 #/primary/sourceVolumeZcenter -5.0
 #
 # EC0 gamma veto liquid scintilator setup
-/geometry/setup/place TU3 Y 180 0 0 5.0
-/geometry/setup/place VetoSc X 0 0 0 0
-/geometry/setup/place sample1 Y 180 0 0 0
-/primary/sourceVolumeRadius 11
-/primary/sourceVolumeThickness 0.137
-/primary/sourceVolumeZcenter 0
+#/geometry/setup/place TU3 Y 180 0 0 5.0
+#/geometry/setup/place VetoSc X 0 0 0 0
+#/geometry/setup/place sample1 Y 180 0 0 0
+#/primary/sourceVolumeRadius 11
+#/primary/sourceVolumeThickness 0.137
+#/primary/sourceVolumeZcenter 0
 #
 # TU3 calibration setups
 #/geometry/setup/place TU2 X 0 0 0 0
@@ -34,11 +34,12 @@
 #
 # Actual TU2+TU3 As-setup
 #/geometry/setup/place TU2 X 0 0 0 0
-#/geometry/setup/place TU3 X 180 0 1 12
-#/geometry/setup/place sample1 X 180 0 0 7
-#/primary/sourceVolumeRadius 11
-#/primary/sourceVolumeThickness 0.137
-#/primary/sourceVolumeZcenter 7
+#/geometry/setup/place TU3 X 180 0 0 12.55545
+/geometry/setup/place TU3 X 180 0 0 9
+/geometry/setup/place sample1 X 180 0 0 7
+/primary/sourceVolumeRadius 11
+/primary/sourceVolumeThickness 0.137
+/primary/sourceVolumeZcenter 7
 #
 #/primary/ion 56 133 # Ba-133
 #/primary/ion 30 65 # Zn-65
@@ -47,11 +48,12 @@
 #/primary/ion 39 88 # Y-88
 #/primary/ion 27 60 # Co-60
 #/primary/ion 11 22 # Na-22
-#/primary/gamma 10.5 keV
+#/primary/gamma 10.5 keV # As K alpha
 #/primary/gamma 559.086 keV
-/primary/ion 33 76 # As-76
-/primary/ECbranching 1.0
-/primary/daughterExcitEnergy 562.93 keV
+#/primary/ion 33 76 # As-76
+/primary/elec 0 keV
+/primary/ECbranching 0.0
+#/primary/daughterExcitEnergy 562.93 keV
 #
 /process/had/deex/correlatedGamma true # Switch on angular correlations
 /process/em/fluo true
@@ -60,9 +62,8 @@
 #/process/em/pixe true
 /run/initialize
 #
-#/histo/file results/As_beta_TU2v04_TU3v11_1E6.root
-/histo/file results/VetoSc00_EC_1E7.root
-/random/setSeeds 15971 46374
+/histo/file results/econt_beta_1E7.root
+/random/setSeeds 15367 54816
 #
 /run/printProgress 1000000
 /run/beamOn 10000000

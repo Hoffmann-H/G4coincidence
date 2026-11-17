@@ -51,7 +51,7 @@ PrimaryMessenger::PrimaryMessenger(PrimaryGenerator* Primary)
   fPrimaryDir->SetGuidance("Primary particle settings");
 
   fGammaCmd = new G4UIcmdWithADoubleAndUnit("/primary/gamma",this);
-  fGammaCmd->SetGuidance("set primary particle a gamma wwith given energy");
+  fGammaCmd->SetGuidance("set primary particle a gamma with given energy");
   fGammaCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
   fPrimaryIonCmd = new G4UIcmdWithAString("/primary/ion",this);
@@ -65,6 +65,10 @@ PrimaryMessenger::PrimaryMessenger(PrimaryGenerator* Primary)
   fDaughterExcitEnergyCmd = new G4UIcmdWithADoubleAndUnit("/primary/daughterExcitEnergy",this);
   fDaughterExcitEnergyCmd->SetGuidance("define excitation energy of EC daughter nucleus");
   fDaughterExcitEnergyCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  fElecCmd = new G4UIcmdWithADoubleAndUnit("/primary/elec",this);
+  fElecCmd->SetGuidance("set primary particle an electron with given energy, set 0 for 76As beta spectrum");
+  fElecCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
   fSourceVolumeRadiusCmd = new G4UIcmdWithADouble("/primary/sourceVolumeRadius",this);
   fSourceVolumeRadiusCmd->SetGuidance("define radius of cylindical source volume in mm");
@@ -95,6 +99,7 @@ PrimaryMessenger::~PrimaryMessenger()
   delete fPrimaryIonCmd;
   delete fPrimaryECbranchingCmd;
   delete fDaughterExcitEnergyCmd;
+  delete fElecCmd;
   delete fSourceVolumeRadiusCmd;
   delete fSourceVolumeXcenterCmd;
   delete fSourceVolumeYcenterCmd;
@@ -124,6 +129,10 @@ void PrimaryMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
   if (command == fDaughterExcitEnergyCmd)
   {
       fPrimary->SetDaughterExcitEnergy(fDaughterExcitEnergyCmd->GetNewDoubleValue(newValue));
+  }
+  if (command == fElecCmd)
+  {
+      fPrimary->SetElec(fElecCmd->GetNewDoubleValue(newValue));
   }
   if (command == fSourceVolumeRadiusCmd)
   {

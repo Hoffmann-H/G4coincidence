@@ -98,6 +98,8 @@ void PhysicsList::ConstructParticle()
     //G4ECDecay* ec = new G4ECDecay(ion, 1.0, 921.5*CLHEP::keV, 0.0, G4Ions::G4FloatLevelBase::no_Float, G4RadioactiveDecayMode::KshellEC);
     //ionDecayTable -> Insert(ec);
     //ion -> SetDecayTable(ionDecayTable);
+
+    G4Electron::ElectronDefinition();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

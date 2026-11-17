@@ -122,6 +122,7 @@ void DetectorConstruction::BuildMaterials()
   mat["Si"] = nist->FindOrBuildMaterial("G4_Si");
   mat["Be"] = nist->FindOrBuildMaterial("G4_Be");
   mat["air"] = nist->FindOrBuildMaterial("G4_AIR");
+  G4cout << "G4_AIR density: " << mat["air"]->GetDensity()/(g/cm3) << " g/cm3" << G4endl;
   mat["Pb"] = nist->FindOrBuildMaterial("G4_Pb");
   mat["Cu"] = nist->FindOrBuildMaterial("G4_Cu");
   mat["Ta"] = nist->FindOrBuildMaterial("G4_Ta");
@@ -233,7 +234,7 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
   // Picture "KETEK multi-layer collimator": outside Al-Ti-Cr-Ta inside
 
   // Si crystal
-  G4double sens_depth = 2.0*mm; // distance between front layer of enrance window and front layer of Si sensor
+  G4double sens_depth = 2.0*mm; // distance between front layer of entrance window and front layer of Si sensor
   G4double sens_dz = 0.450*mm;
   G4double sens_rmin = 0.0*mm;
   G4double sens_rmax = 7.5*mm;//5.890*mm; // area = 109mm^2. 
@@ -242,7 +243,7 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
   G4Transform3D Si_internal_translate = G4Translate3D(0.0, 0.0, -sens_depth-0.5*sens_dz);
   // Si sensitive part - to be tuned
   // G4double sens_rsens = 5.0*mm; // collimator inner radius from technical drawing
-  G4double sens_rsens = 5.24*mm;
+  G4double sens_rsens = 5.06*mm;
   G4double sens_dead_front = 0.008*mm;
   G4double sens_dead_back = 0.001*mm;
   G4Transform3D sens_internal_translate = G4Translate3D(0.0, 0.0, 0.5*(sens_dead_back-sens_dead_front));
@@ -261,7 +262,7 @@ void DetectorConstruction::ConstructTU3Detector(G4LogicalVolume* mother_logical,
   //G4double coll_rmin = 5.046*mm; // collimated area = 80mm^2 = pi*r^2 => r = 5.046mm
   //G4double coll_rmin = 1.7933617; // tuned to match experimental efficiency for 14keV gammas @50mm
   // G4double coll_rmin = 5.0*mm; // from technical drawing; consistent with nominal collimated area
-  G4double coll_rmin = 5.24*mm;
+  G4double coll_rmin = 5.06*mm;
   G4double coll_dz = 0.42*mm;
   G4double coll_rmax = 7.55*mm;
   G4double coll_sphi = sphi;
